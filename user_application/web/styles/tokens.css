@@ -1,0 +1,31 @@
+:root {
+  --bg: #f3f6fa;
+  --surface: rgba(255, 255, 255, 0.96);
+  --surface-soft: #f8fafc;
+  --surface-strong: #eef3f8;
+  --line: #dbe3ec;
+  --line-strong: #c9d4e1;
+  --text: #10213c;
+  --muted: #6b7d94;
+  --navy: #072b5c;
+  --navy-2: #0d3f7b;
+  --blue: #2d7ff9;
+  --cyan: #41b6e6;
+  --green: #12a36d;
+  --orange: #f39a2d;
+  --red: #e75555;
+  --shadow: 0 10px 32px rgba(25, 53, 84, 0.08), 0 2px 7px rgba(25, 53, 84, 0.04);
+  --shadow-soft: 0 3px 14px rgba(25, 53, 84, 0.07);
+  --radius-lg: 22px;
+  --radius-md: 15px;
+  --radius-sm: 10px;
+  --header-h: 66px;
+  --font: "Pretendard", "Noto Sans KR", "Segoe UI", "Malgun Gothic", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { background: #f3f6fa; }
+html, body { width: 100%; min-width: 0; height: 100%; margin: 0; }
+body { overflow: auto; background: radial-gradient(circle at 40% -20%, #fff 0, var(--bg) 58%); color: var(--text); font-family: var(--font); font-size: 14px; }
+button, input, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }

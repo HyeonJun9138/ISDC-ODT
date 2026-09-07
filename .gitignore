@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+data/workspace/
+project_support/.pytest_cache/
+project_support/reference/before_refactoring/
+*.log
+*.pid
+
+# Local tools, environments and credentials
+.codeboarding/
+.vscode/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local planning material and pre-refactoring copies are not runtime source.
+/project_support/reference/

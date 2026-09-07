@@ -1,0 +1,16 @@
+from typing import Protocol
+
+
+class CatalogSource(Protocol):
+    async def fetch_gp(self, group: str) -> list[dict]: ...
+
+    async def fetch_satcat(self, catalog_number: int) -> dict: ...
+
+
+class CatalogReader(Protocol):
+    def catalog_groups(self) -> list[dict]: ...
+
+    async def get_satellites(self, group: str = 'active', limit: int = 0,
+                            offset: int = 0, query: str = '', orbit: str = 'all') -> dict: ...
+
+    async def get_satellite_profile(self, catalog_number: int) -> dict: ...

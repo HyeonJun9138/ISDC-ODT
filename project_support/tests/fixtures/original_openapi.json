@@ -1,0 +1,1338 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SpaceTwin VVP",
+    "version": "0.3.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bootstrap": {
+      "get": {
+        "summary": "Bootstrap",
+        "operationId": "bootstrap_api_bootstrap_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Bootstrap Api Bootstrap Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/satellites": {
+      "get": {
+        "summary": "Satellites",
+        "operationId": "satellites_api_satellites_get",
+        "parameters": [
+          {
+            "name": "group",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 32,
+              "default": "active",
+              "title": "Group"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50000,
+              "minimum": 0,
+              "description": "0이면 필터 결과 전체 반환",
+              "default": 0,
+              "title": "Limit"
+            },
+            "description": "0이면 필터 결과 전체 반환"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Q"
+            }
+          },
+          {
+            "name": "orbit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(all|LEO|MEO|GEO|HEO)$",
+              "default": "all",
+              "title": "Orbit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Satellites Api Satellites Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/satellites/{catalog_number}": {
+      "get": {
+        "summary": "Satellite Profile",
+        "operationId": "satellite_profile_api_satellites__catalog_number__get",
+        "parameters": [
+          {
+            "name": "catalog_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "maximum": 999999999,
+              "minimum": 1,
+              "description": "NORAD Catalog Number",
+              "title": "Catalog Number"
+            },
+            "description": "NORAD Catalog Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Satellite Profile Api Satellites  Catalog Number  Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/satellite-groups": {
+      "get": {
+        "summary": "Satellite Groups",
+        "operationId": "satellite_groups_api_satellite_groups_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Satellite Groups Api Satellite Groups Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runtime/control": {
+      "post": {
+        "summary": "Runtime Control",
+        "operationId": "runtime_control_api_runtime_control_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuntimeControl"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Runtime Control Api Runtime Control Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/runtime/speed": {
+      "post": {
+        "summary": "Runtime Speed",
+        "operationId": "runtime_speed_api_runtime_speed_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuntimeSpeed"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Runtime Speed Api Runtime Speed Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scenario/select": {
+      "post": {
+        "summary": "Scenario Select",
+        "operationId": "scenario_select_api_scenario_select_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScenarioSelection"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Scenario Select Api Scenario Select Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/faults": {
+      "post": {
+        "summary": "Inject Fault",
+        "operationId": "inject_fault_api_faults_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FaultRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Inject Fault Api Faults Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/communication/link-budget": {
+      "post": {
+        "summary": "Link Budget",
+        "operationId": "link_budget_api_communication_link_budget_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkBudgetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Link Budget Api Communication Link Budget Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/communication/route": {
+      "post": {
+        "summary": "Communication Route",
+        "operationId": "communication_route_api_communication_route_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RouteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Communication Route Api Communication Route Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/communication/contacts": {
+      "get": {
+        "summary": "Communication Contacts",
+        "operationId": "communication_contacts_api_communication_contacts_get",
+        "parameters": [
+          {
+            "name": "hours",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 72,
+              "minimum": 1,
+              "default": 12,
+              "title": "Hours"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Communication Contacts Api Communication Contacts Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/missions/action": {
+      "post": {
+        "summary": "Mission Action",
+        "operationId": "mission_action_api_missions_action_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MissionAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Mission Action Api Missions Action Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/missions/tasks": {
+      "post": {
+        "summary": "Mission Task",
+        "operationId": "mission_task_api_missions_tasks_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MissionTaskMutation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Mission Task Api Missions Tasks Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/missions/{mission_id}/validate": {
+      "get": {
+        "summary": "Mission Validate",
+        "operationId": "mission_validate_api_missions__mission_id__validate_get",
+        "parameters": [
+          {
+            "name": "mission_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Mission Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Mission Validate Api Missions  Mission Id  Validate Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/missions/replan": {
+      "post": {
+        "summary": "Mission Replan",
+        "operationId": "mission_replan_api_missions_replan_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MissionReplanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Mission Replan Api Missions Replan Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hil/device": {
+      "post": {
+        "summary": "Device Action",
+        "operationId": "device_action_api_hil_device_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceAction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Device Action Api Hil Device Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hil/preflight": {
+      "get": {
+        "summary": "Hil Preflight",
+        "operationId": "hil_preflight_api_hil_preflight_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Hil Preflight Api Hil Preflight Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hil/sequence": {
+      "post": {
+        "summary": "Hil Sequence",
+        "operationId": "hil_sequence_api_hil_sequence_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HilSequenceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Hil Sequence Api Hil Sequence Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/hil/recording": {
+      "post": {
+        "summary": "Hil Recording",
+        "operationId": "hil_recording_api_hil_recording_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordingControl"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Hil Recording Api Hil Recording Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/summary.csv": {
+      "get": {
+        "summary": "Report Csv",
+        "operationId": "report_csv_api_reports_summary_csv_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/reports/snapshot.json": {
+      "get": {
+        "summary": "Report Json",
+        "operationId": "report_json_api_reports_snapshot_json_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DeviceAction": {
+        "properties": {
+          "device_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Device Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "connect",
+              "disconnect",
+              "sync",
+              "loopback"
+            ],
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "device_id",
+          "action"
+        ],
+        "title": "DeviceAction"
+      },
+      "FaultRequest": {
+        "properties": {
+          "target": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Target"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "link_loss",
+              "power_drop",
+              "thermal_spike",
+              "storage_pressure",
+              "latency_spike"
+            ],
+            "title": "Kind"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ],
+            "title": "Severity",
+            "default": "medium"
+          },
+          "duration_seconds": {
+            "type": "integer",
+            "maximum": 3600.0,
+            "minimum": 1.0,
+            "title": "Duration Seconds",
+            "default": 60
+          }
+        },
+        "type": "object",
+        "required": [
+          "target",
+          "kind"
+        ],
+        "title": "FaultRequest"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HilSequenceRequest": {
+        "properties": {
+          "sequence_id": {
+            "type": "string",
+            "enum": [
+              "preflight",
+              "closed_loop",
+              "fault_recovery"
+            ],
+            "title": "Sequence Id",
+            "default": "closed_loop"
+          }
+        },
+        "type": "object",
+        "title": "HilSequenceRequest"
+      },
+      "LinkBudgetRequest": {
+        "properties": {
+          "link_id": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Link Id"
+          },
+          "frequency_ghz": {
+            "type": "number",
+            "maximum": 300.0,
+            "exclusiveMinimum": 0.1,
+            "title": "Frequency Ghz",
+            "default": 26.0
+          },
+          "distance_km": {
+            "type": "number",
+            "maximum": 100000.0,
+            "exclusiveMinimum": 1.0,
+            "title": "Distance Km",
+            "default": 1200.0
+          },
+          "tx_power_w": {
+            "type": "number",
+            "maximum": 100000.0,
+            "exclusiveMinimum": 0.01,
+            "title": "Tx Power W",
+            "default": 20.0
+          },
+          "tx_gain_dbi": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": -20.0,
+            "title": "Tx Gain Dbi",
+            "default": 32.0
+          },
+          "rx_gain_dbi": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": -20.0,
+            "title": "Rx Gain Dbi",
+            "default": 34.0
+          },
+          "misc_losses_db": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Misc Losses Db",
+            "default": 3.0
+          },
+          "bandwidth_mhz": {
+            "type": "number",
+            "maximum": 100000.0,
+            "exclusiveMinimum": 0.001,
+            "title": "Bandwidth Mhz",
+            "default": 20.0
+          },
+          "data_rate_mbps": {
+            "type": "number",
+            "maximum": 100000.0,
+            "exclusiveMinimum": 0.001,
+            "title": "Data Rate Mbps",
+            "default": 10.0
+          },
+          "system_temp_k": {
+            "type": "number",
+            "maximum": 5000.0,
+            "exclusiveMinimum": 1.0,
+            "title": "System Temp K",
+            "default": 290.0
+          },
+          "required_ebno_db": {
+            "type": "number",
+            "maximum": 50.0,
+            "minimum": -10.0,
+            "title": "Required Ebno Db",
+            "default": 7.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "link_id"
+        ],
+        "title": "LinkBudgetRequest"
+      },
+      "MissionAction": {
+        "properties": {
+          "mission_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Mission Id"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "start",
+              "pause",
+              "replan",
+              "abort",
+              "complete"
+            ],
+            "title": "Action"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mission_id",
+          "action"
+        ],
+        "title": "MissionAction"
+      },
+      "MissionReplanRequest": {
+        "properties": {
+          "mission_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Mission Id"
+          },
+          "apply": {
+            "type": "boolean",
+            "title": "Apply",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "mission_id"
+        ],
+        "title": "MissionReplanRequest"
+      },
+      "MissionTaskMutation": {
+        "properties": {
+          "mission_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Mission Id"
+          },
+          "task_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Id"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "create",
+              "update",
+              "delete"
+            ],
+            "title": "Operation"
+          },
+          "lane": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "관측",
+                  "처리",
+                  "저장",
+                  "전송",
+                  "검증"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lane"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "duration": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "planned",
+                  "running",
+                  "done",
+                  "blocked"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "predecessor": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Predecessor"
+          },
+          "priority": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 10.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mission_id",
+          "operation"
+        ],
+        "title": "MissionTaskMutation"
+      },
+      "RecordingControl": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled"
+        ],
+        "title": "RecordingControl"
+      },
+      "RouteRequest": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Source"
+          },
+          "target": {
+            "type": "string",
+            "maxLength": 40,
+            "minLength": 1,
+            "title": "Target"
+          },
+          "objective": {
+            "type": "string",
+            "enum": [
+              "latency",
+              "reliability",
+              "balanced"
+            ],
+            "title": "Objective",
+            "default": "balanced"
+          }
+        },
+        "type": "object",
+        "required": [
+          "source",
+          "target"
+        ],
+        "title": "RouteRequest"
+      },
+      "RuntimeControl": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "start",
+              "pause",
+              "reset",
+              "step"
+            ],
+            "title": "Action"
+          },
+          "speed": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 128.0,
+                "minimum": 0.1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "RuntimeControl"
+      },
+      "RuntimeSpeed": {
+        "properties": {
+          "speed": {
+            "type": "number",
+            "maximum": 128.0,
+            "minimum": 0.1,
+            "title": "Speed"
+          }
+        },
+        "type": "object",
+        "required": [
+          "speed"
+        ],
+        "title": "RuntimeSpeed"
+      },
+      "ScenarioSelection": {
+        "properties": {
+          "scenario_id": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Scenario Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "scenario_id"
+        ],
+        "title": "ScenarioSelection"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

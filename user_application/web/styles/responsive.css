@@ -1,0 +1,30 @@
+@media (max-width: 1450px) {
+  :root { --header-h: 60px; }
+  body { font-size: 13px; }
+  .app-shell { padding: 8px; gap: 8px; }
+  .topbar { border-radius: 15px; }
+  #view-orbit { grid-template-columns: 240px minmax(590px,1fr) 270px; }
+  #view-communication { grid-template-columns: 250px minmax(590px,1fr) 260px; }
+  #view-mission { grid-template-columns: 250px minmax(620px,1fr) 270px; }
+  #view-analysis { grid-template-columns: 225px minmax(620px,1fr) 260px; }
+  #view-hil { grid-template-columns: 245px minmax(620px,1fr) 265px; }
+  .panel { padding: 13px; border-radius: 17px; }
+  .orbit-metrics { grid-template-columns: 1fr .8fr 1.2fr 1fr; }
+  .comm-bottom { flex-basis: 220px; }
+  .queue-grid { grid-template-columns: repeat(2,1fr); }
+  .queue-item:nth-child(n+3) { display: none; }
+}
+
+@media (max-height: 820px) {
+  .scenario-panel { flex-basis: 205px; }
+  .orbit-metrics { flex-basis: 122px; }
+  .timeline-control { flex-basis: 58px; }
+  .metric-card { padding: 9px; }
+  .status-card { min-height: 52px; }
+  .comm-bottom { flex-basis: 200px; }
+  .decision-log-panel { flex-basis: 190px; }
+  .trace-panel { flex-basis: 205px; }
+  .hil-log-panel { flex-basis: 175px; }
+  .terminal-log { height: 110px; }
+}
+
