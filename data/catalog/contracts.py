@@ -2,7 +2,9 @@ from typing import Protocol
 
 
 class CatalogSource(Protocol):
-    async def fetch_gp(self, group: str) -> list[dict]: ...
+    # if_modified_since is what the provider last said about the caller's
+    # snapshot; None comes back when it answers that the snapshot is current.
+    async def fetch_gp(self, group: str, if_modified_since: str = '') -> list[dict] | None: ...
 
     async def fetch_satcat(self, catalog_number: int) -> dict: ...
 

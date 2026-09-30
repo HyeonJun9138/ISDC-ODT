@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import socket
 import threading
 import time
@@ -24,6 +25,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true", help="브라우저를 자동으로 열지 않음")
     parser.add_argument("--reload", action="store_true", help="개발용 자동 재시작")
+    parser.add_argument("--data-fabric-url", default="", help="별도 프로세스의 데이터 패브릭 모듈 주소 (예: http://127.0.0.1:8792). 비우면 내장 임시 구현을 쓴다")
+    parser.add_argument("--data-management-url", default="", help="별도 프로세스의 데이터 관리 모듈 주소 (예: http://127.0.0.1:8793). 비우면 내장 임시 구현을 쓴다")
+    parser.add_argument("--orchestration-url", default="", help="별도 프로세스의 군집 운용 모듈 주소 (예: http://127.0.0.1:5103). 비우면 내장 임시 구현을 쓴다")
     return parser.parse_args(argv)
 
 
@@ -63,5 +67,22 @@ def main(argv: list[str] | None = None) -> None:
     if browser_url != share_url:
         print(f"로컬 접속  →  {browser_url}")
     print(f"수신 주소  →  {args.host}:{args.port}")
+    if args.data_fabric_url:
+        os.environ["SPACETWIN_DATA_FABRIC_URL"] = args.data_fabric_url
+        print(f"데이터 패브릭  →  외부 {args.data_fabric_url}")
+    else:
+        os.environ.pop("SPACETWIN_DATA_FABRIC_URL", None)
+        print("데이터 패브릭  →  내장 임시 구현")
+    if args.data_management_url:
+        os.environ["SPACETWIN_DATA_MANAGEMENT_URL"] = args.data_management_url
+        print(f"데이터 관리  →  외부 {args.data_management_url}")
+    else:
+        os.environ.pop("SPACETWIN_DATA_MANAGEMENT_URL", None)
+    if args.orchestration_url:
+        os.environ["SPACETWIN_ORCHESTRATION_URL"] = args.orchestration_url
+        print(f"군집 운용  →  외부 {args.orchestration_url}")
+    else:
+        os.environ.pop("SPACETWIN_ORCHESTRATION_URL", None)
+        print("데이터 관리  →  내장 임시 구현")
     print("종료: Ctrl+C\n")
     uvicorn.run("user_application.web.application:create_app", factory=True, host=args.host, port=args.port, reload=args.reload, reload_dirs=[str(ROOT_DIR)] if args.reload else None, log_level="info")

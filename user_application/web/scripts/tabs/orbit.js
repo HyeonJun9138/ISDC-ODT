@@ -1,503 +1,526 @@
 import { api } from "/static/communication/api.js?v=20260907-1";
-import { drawSparkline, pushHistory } from "/static/visualization/charts.js";
-import { GlobeController } from "/static/visualization/globe.js?v=20260907-1";
-import { emit, setState, store } from "../state.js";
+import { GlobeController } from "/static/visualization/globe.js?v=20260908-oisl-flow1";
+import { GROUND_STATIONS, stationGroups } from "/static/model_library/ground_station_sites.js";
+import { stationCardModel, stationOptionMarkup, visibleSatelliteCount } from "../orbit/station_card.js";
+import { lookAnglesAt } from "/static/simulation/orbit.js?v=20260907-2";
+import { emit, on, setState, store } from "../state.js";
+import { constellation } from "../nodes/constellation.js";
+import { bindLightingToggle } from "../orbit/globe_lighting.js";
+import { bindZoomControls } from "../orbit/zoom_controls.js";
+import { OrbitClock } from "../orbit/clock.js?v=20260908-scenario1";
+import { displayNumber, utcLabel, escapeMarkup as esc, selectCatalog } from "../orbit/catalog.js";
+import { createCatalogList } from "../orbit/catalog_view.js";
+import { createInspector } from "../orbit/inspector.js";
+import { SatelliteModelLayer } from "/static/visualization/satellite_model.js?v=20260908-camera2";
+import { createModelResolver, describeMatch, loadSatelliteModels } from "../orbit/satellite_models.js";
+import { loading } from "../loading.js";
 
-let globe;
-let pathRefreshCounter = 0;
-let searchTimer;
-let lastPassKey = "";
-let satelliteListFrame = 0;
-let lastHoverSatelliteId = null;
-let profileRequestToken = 0;
-const satelliteProfileCache = new Map();
-const SATELLITE_VIRTUAL_THRESHOLD = 400;
-const SATELLITE_ROW_HEIGHT = 51;
-const SATELLITE_ROW_BUFFER = 8;
-
-const OWNER_LABELS = {
-  US: "미국", CIS: "러시아/CIS", PRC: "중국", UK: "영국", JPN: "일본",
-  ESA: "유럽우주국", EUME: "EUMETSAT", IND: "인도", FR: "프랑스", GER: "독일",
-  IT: "이탈리아", CAN: "캐나다", KOR: "대한민국", NKOR: "북한", ISS: "국제우주정거장",
-  NATO: "NATO", TBD: "확인 중",
+const $ = selector => document.querySelector(selector);
+const FAVORITES_KEY = "spacetwin-orbit-favorites-v1";
+const SOURCE_LABELS = {
+  "celestrak-live": "CelesTrak GP / 수집 완료", "celestrak-cache": "CelesTrak GP / 캐시",
+  "celestrak-stale": "CelesTrak GP / 이전 스냅샷 (갱신 실패)",
+  "demo-fallback": "DEMO / 원형 2체 모의", "upstream-unavailable": "GP 미제공 / 상류 연결 확인",
 };
-const OPS_STATUS = {
-  "+": ["운용 중", "success"], "-": ["비운용", "danger"], P: ["부분 운용", "warning"],
-  B: ["백업/예비", "warning"], S: ["대기/예비", "neutral"], X: ["연장 임무", "success"],
-  D: ["궤도 이탈/소멸", "danger"], "?": ["상태 미확인", "neutral"],
-};
-const OBJECT_TYPE_LABELS = { PAY: "탑재체", "R/B": "로켓 본체", DEB: "파편", UNK: "미확인 객체", TBA: "분류 대기" };
-const CLASSIFICATION_LABELS = { U: "공개 (U)", C: "기밀 (C)", S: "비밀 (S)" };
-const ORBIT_ACCENTS = { LEO: "#ff9f43", MEO: "#e6ed55", GEO: "#5ee277", HEO: "#53c8ff" };
+let globe, clock, list, inspector, modelLayer, lighting;
+let resolveModel = () => null;
+let catalog = {}, catalogItems = [], itemById = new Map(), visibleItems = [];
+let requestToken = 0, searchTimer, tickTimer, lastPathTime = null, lastListPaint = 0;
+let catalogRender = Promise.resolve(), renderState = "ready";
+let passTimer, passRevision = 0, passBasis = null, lastPassWall = 0;
+let ready = false, selectedId = null, sort = "name", direction = "asc", favoritesOnly = false, orbitRegime = "all";
+// Ground-site card in the right column: the site being shown and the cached next pass for it.
+let stationCardKey = null, stationPassCache = { key: null, pass: null };
+let favorites = new Set();
 
-const $ = (selector) => document.querySelector(selector);
-
-function escapeMarkup(value) {
-  return String(value ?? "—").replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]);
+function loadFavorites() {
+  try {
+    const data = JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]");
+    favorites = new Set(Array.isArray(data) ? data.filter(id => /^\d{1,9}$/.test(String(id))).map(String) : []);
+  } catch { favorites = new Set(); }
 }
 
-function setProfileText(selector, value) {
-  const element = $(selector);
-  if (element) element.textContent = value == null || value === "" ? "—" : String(value);
+function updateFavorites() {
+  const saved = favorites.has(selectedId);
+  const button = $("#selected-favorite");
+  button.disabled = !selectedId;
+  button.textContent = saved ? "★" : "☆";
+  button.setAttribute("aria-pressed", String(saved));
+  button.setAttribute("aria-label", saved ? "선택 위성 관심 해제" : "선택 위성 관심 등록");
 }
 
-function finiteNumber(value) {
-  const number = Number(value);
-  return Number.isFinite(number) ? number : null;
+// SDC is not an orbit class: it narrows the list to the satellites deployed from the node tab
+// (Space Data Center nodes) before the usual query, favourite and sort policy applies.
+function filterCatalog() {
+  const sdcOnly = orbitRegime === "SDC";
+  globe?.setSdcMode(sdcOnly);
+  visibleItems = selectCatalog(sdcOnly ? catalogItems.filter(item => item.node === true) : catalogItems, {
+    query: $("#satellite-search").value, orbit: sdcOnly ? "all" : orbitRegime,
+    favoritesOnly, favorites, sort, direction,
+  });
+  list.setItems(visibleItems, favorites);
+  list.select(selectedId);
+  globe?.setVisibleSatellites(visibleItems.map(item => String(item.NORAD_CAT_ID)));
+  $("#catalog-count").textContent = `${visibleItems.length.toLocaleString()} / ${catalogItems.length.toLocaleString()} 개`;
+  $("#catalog-sort-label").textContent = `${{ name: "이름", id: "NORAD", orbit: "궤도군", age: "Epoch 경과" }[sort]} ${direction === "asc" ? "↑" : "↓"}`;
+  document.querySelectorAll("[data-catalog-sort]").forEach(button => {
+    const active = button.dataset.catalogSort === sort;
+    button.querySelector("i").textContent = active ? direction === "asc" ? "↑" : "↓" : "";
+    button.setAttribute("aria-label", `${button.dataset.catalogSort} 정렬${active ? direction === "asc" ? ", 오름차순" : ", 내림차순" : ""}`);
+  });
 }
 
-function orbitRegime(item = {}) {
-  const orbit = String(item.ORBIT_REGIME || "").toUpperCase();
-  return ORBIT_ACCENTS[orbit] ? orbit : "LEO";
+function selectSatellite(item, position, id, context = {}) {
+  const changed = selectedId !== String(id);
+  // Clicking the already selected body again releases the selection.
+  if (!changed && context.userInitiated && !context.focus) { clearSelection(); return; }
+  selectedId = String(id);
+  store.selectedSatellite = selectedId;
+  if (changed) {
+    inspector.select(item, catalog, clock.now());
+    list.select(selectedId, context.userInitiated === true);
+    updateFavorites();
+    showModel(item, selectedId);
+    schedulePasses();
+    emit("satellite:selected", { item, position, id: selectedId });
+  }
+  if (context.focus) focusSelected();
+  else if (context.userInitiated) centerSelected();
+  inspector.update(position, clock.now(), { libraryAvailable: !!globe.satelliteLib });
+  renderObservation(position);
 }
 
-function objectVisualKind(item = {}, catalog = {}) {
-  const name = String(catalog.OBJECT_NAME || item.OBJECT_NAME || "");
-  const type = String(catalog.OBJECT_TYPE || "").toUpperCase();
-  if (/ISS|TIANGONG|SPACE STATION|CSS \(TIANHE\)/i.test(name)) return "station";
-  if (type.includes("R/B") || /\bR\/B\b|ROCKET BODY/i.test(name)) return "rocket";
-  if (type.includes("DEB") || /\bDEB\b|DEBRIS|FRAGMENT/i.test(name)) return "debris";
-  return "payload";
+// NASA 3D Resources shape: a display aid resolved from the manifest, never an identification source.
+function renderShape(match) {
+  const text = describeMatch(match);
+  const state = $("#shape-state");
+  if (!state) return;
+  state.textContent = text.state;
+  state.dataset.quality = match?.quality || "none";
+  $("#shape-label").textContent = text.label;
+  $("#shape-note").textContent = text.note;
+  const credit = $("#shape-credit");
+  if (credit) {
+    credit.hidden = !text.credit;
+    credit.textContent = text.creditUrl ? `${text.credit} ↗` : text.credit;
+    if (text.creditUrl) credit.href = text.creditUrl; else credit.removeAttribute("href");
+  }
+  const image = $("#shape-image");
+  if (match) { image.src = match.thumbnail; image.alt = text.alt; image.hidden = false; }
+  else { image.removeAttribute("src"); image.alt = ""; image.hidden = true; }
 }
 
-function objectTypeLabel(catalog = {}, item = {}) {
-  const raw = String(catalog.OBJECT_TYPE || "").toUpperCase();
-  if (OBJECT_TYPE_LABELS[raw]) return `${OBJECT_TYPE_LABELS[raw]} (${raw})`;
-  const kind = objectVisualKind(item, catalog);
-  return kind === "station" ? "우주정거장" : kind === "rocket" ? "로켓 본체" : kind === "debris" ? "파편" : "탑재체";
+function showModel(item, id) {
+  const match = item ? resolveModel(item) : null;
+  renderShape(match);
+  if (!modelLayer) return;
+  if (!item) { modelLayer.clear(); return; }
+  // Objects without a model keep a follow target so the camera can still frame the point marker.
+  modelLayer.show(match ? { satelliteId: id, ...match } : { satelliteId: id }, date => globe.positionAt(id, date), clock.now());
 }
 
-function ownerLabel(code) {
-  const raw = String(code || "").trim().toUpperCase();
-  if (!raw) return "—";
-  return OWNER_LABELS[raw] ? `${OWNER_LABELS[raw]} (${raw})` : raw;
+function focusSelected() {
+  if (!selectedId || !modelLayer) return;
+  if (!modelLayer.focus(clock.now())) renderTrackingState(modelLayer.tracking === true);
 }
 
-function coordinateLabel(value, positive, negative) {
-  const number = finiteNumber(value);
-  if (number == null) return "—";
-  return `${Math.abs(number).toFixed(2)}°${number >= 0 ? positive : negative}`;
+// No selected body: the globe, model layer, inspector, list, passes and observation all reset.
+function clearSelection() {
+  selectedId = null;
+  store.selectedSatellite = null;
+  globe?.clearSelection?.();
+  inspector.clear();
+  showModel(null, null);
+  list.select(null);
+  updateFavorites();
+  invalidatePasses("위성을 선택하세요.");
+  renderObservation(null);
+  renderTrackingState(false);
 }
 
-function updateSatelliteInspectorLive(position, id = store.selectedSatellite) {
-  const inspector = $("#satellite-inspector");
-  if (!inspector || inspector.dataset.satelliteId !== String(id) || !position) return;
-  setProfileText("#profile-altitude", `${Number(position.altitude).toLocaleString("ko-KR", { maximumFractionDigits: 1 })} km`);
-  setProfileText("#profile-speed", finiteNumber(position.velocity) == null ? "—" : `${Number(position.velocity).toFixed(2)} km/s`);
-  setProfileText("#profile-latitude", coordinateLabel(position.latitude, "N", "S"));
-  setProfileText("#profile-longitude", coordinateLabel(position.longitude, "E", "W"));
+// A user selection centres the body under a top-down camera at the current distance; only
+// the explicit locate action (button, double click) moves in close.
+function centerSelected() {
+  if (!selectedId || !modelLayer) return;
+  if (!modelLayer.focus(clock.now(), { keepRange: true })) renderTrackingState(modelLayer.tracking === true);
 }
 
-function renderSatelliteInspectorBase(item, position, id) {
-  const inspector = $("#satellite-inspector");
-  const visual = $("#satellite-profile-visual");
-  if (!inspector || !visual) return;
-  const orbit = orbitRegime(item);
-  const kind = objectVisualKind(item);
-  inspector.dataset.satelliteId = String(id);
-  inspector.dataset.orbit = orbit;
-  inspector.style.setProperty("--profile-accent", ORBIT_ACCENTS[orbit]);
-  inspector.classList.add("loading");
-  visual.dataset.orbit = orbit;
-  visual.dataset.kind = kind;
-  setProfileText("#profile-name", item.OBJECT_NAME || `NORAD ${id}`);
-  setProfileText("#profile-norad", `NORAD ${id}`);
-  setProfileText("#profile-cospar", `COSPAR ${item.OBJECT_ID || "—"}`);
-  setProfileText("#profile-status", "SATCAT 조회 중");
-  const dot = $("#profile-status-dot");
-  if (dot) dot.className = "warning";
-  setProfileText("#profile-owner", "조회 중");
-  setProfileText("#profile-ops-status", "조회 중");
-  setProfileText("#profile-object-type", objectTypeLabel({}, item));
-  setProfileText("#profile-object-id", item.OBJECT_ID || "—");
-  setProfileText("#profile-launch-date", "—");
-  setProfileText("#profile-launch-site", "—");
-  setProfileText("#profile-rcs", "—");
-  setProfileText("#profile-classification", CLASSIFICATION_LABELS[String(item.CLASSIFICATION_TYPE || "U").toUpperCase()] || item.CLASSIFICATION_TYPE || "—");
-  setProfileText("#profile-orbit", orbit);
-  setProfileText("#profile-period", finiteNumber(item.PERIOD_MINUTES) == null ? "—" : `${Number(item.PERIOD_MINUTES).toFixed(2)} min`);
-  setProfileText("#profile-inclination", finiteNumber(item.INCLINATION) == null ? "—" : `${Number(item.INCLINATION).toFixed(3)}°`);
-  setProfileText("#profile-eccentricity", finiteNumber(item.ECCENTRICITY) == null ? "—" : Number(item.ECCENTRICITY).toFixed(7));
-  setProfileText("#profile-apogee", finiteNumber(item.APOGEE_KM) == null ? "—" : `${Number(item.APOGEE_KM).toLocaleString("ko-KR", { maximumFractionDigits: 0 })} km`);
-  setProfileText("#profile-perigee", finiteNumber(item.PERIGEE_KM) == null ? "—" : `${Number(item.PERIGEE_KM).toLocaleString("ko-KR", { maximumFractionDigits: 0 })} km`);
-  setProfileText("#profile-epoch-age", item.EPOCH_AGE_HOURS == null ? "Epoch —" : `Epoch ${Number(item.EPOCH_AGE_HOURS).toFixed(1)} h 전`);
-  setProfileText("#profile-source", "GP · SGP4");
-  setProfileText("#profile-visual-class", `${orbit} · ${objectTypeLabel({}, item).toUpperCase()}`);
-  setProfileText("#profile-data-note", "궤도는 최신 GP 요소를 SGP4로 전파한 값입니다. 대표 형상은 객체 유형에 따른 시각화이며 실제 촬영 이미지나 정확한 기체 외형이 아닙니다.");
-  const link = $("#profile-celestrak-link");
-  if (link) link.href = `https://celestrak.org/satcat/records.php?CATNR=${encodeURIComponent(id)}&FORMAT=JSON-PRETTY`;
-  updateSatelliteInspectorLive(position, id);
-}
-
-function applySatelliteProfile(item, id, payload) {
-  const inspector = $("#satellite-inspector");
-  if (!inspector || inspector.dataset.satelliteId !== String(id)) return;
-  const catalog = payload?.catalog || {};
-  const visual = $("#satellite-profile-visual");
-  const kind = objectVisualKind(item, catalog);
-  if (visual) visual.dataset.kind = kind;
-  const statusCode = String(catalog.OPS_STATUS_CODE || "?").trim() || "?";
-  const [statusLabel, statusClass] = OPS_STATUS[statusCode] || [`상태 코드 ${statusCode}`, "neutral"];
-  const dot = $("#profile-status-dot");
-  if (dot) dot.className = statusClass;
-  setProfileText("#profile-status", payload.source === "gp-cache" ? "SATCAT 상세 제한" : statusLabel);
-  setProfileText("#profile-name", catalog.OBJECT_NAME || item.OBJECT_NAME || `NORAD ${id}`);
-  setProfileText("#profile-cospar", `COSPAR ${catalog.OBJECT_ID || item.OBJECT_ID || "—"}`);
-  setProfileText("#profile-owner", ownerLabel(catalog.OWNER));
-  setProfileText("#profile-ops-status", statusLabel);
-  setProfileText("#profile-object-type", objectTypeLabel(catalog, item));
-  setProfileText("#profile-object-id", catalog.OBJECT_ID || item.OBJECT_ID || "—");
-  setProfileText("#profile-launch-date", catalog.LAUNCH_DATE || "—");
-  setProfileText("#profile-launch-site", catalog.LAUNCH_SITE || "—");
-  const rcs = finiteNumber(catalog.RCS);
-  setProfileText("#profile-rcs", rcs == null ? "—" : `${rcs.toLocaleString("ko-KR", { maximumFractionDigits: 3 })} m²`);
-  setProfileText("#profile-classification", CLASSIFICATION_LABELS[String(item.CLASSIFICATION_TYPE || "U").toUpperCase()] || item.CLASSIFICATION_TYPE || "—");
-  setProfileText("#profile-source", payload.source === "celestrak-satcat" ? "CelesTrak SATCAT" : "현재 GP 정보");
-  setProfileText("#profile-visual-class", `${orbitRegime(item)} · ${objectTypeLabel(catalog, item).toUpperCase()}`);
-  if (payload.warning) setProfileText("#profile-data-note", payload.warning);
-  inspector.classList.remove("loading");
-}
-
-async function loadSatelliteProfile(item, id) {
-  const cached = satelliteProfileCache.get(String(id));
-  if (cached) {
-    applySatelliteProfile(item, id, cached);
+function renderTrackingState(tracking) {
+  const label = $("#render-mode");
+  if (!label) return;
+  const is2D = globe?.viewer && window.Cesium?.SceneMode && globe.viewer.scene.mode === window.Cesium.SceneMode.SCENE2D;
+  if (is2D) {
+    label.textContent = tracking ? "2D 북쪽 위 / 선택 위성 중심 (휠: 지도 축척, Esc·뷰 초기화: 해제)" : "2D 북쪽 위 / 지도 좌표";
     return;
   }
-  const token = ++profileRequestToken;
-  try {
-    const payload = await api.satelliteProfile(id);
-    satelliteProfileCache.set(String(id), payload);
-    if (token === profileRequestToken) applySatelliteProfile(item, id, payload);
-  } catch (error) {
-    if (token !== profileRequestToken || $("#satellite-inspector")?.dataset.satelliteId !== String(id)) return;
-    const inspector = $("#satellite-inspector");
-    inspector?.classList.remove("loading");
-    const dot = $("#profile-status-dot");
-    if (dot) dot.className = "warning";
-    setProfileText("#profile-status", "상세정보 제한");
-    setProfileText("#profile-source", "현재 GP 정보");
-    setProfileText("#profile-data-note", `SATCAT 메타데이터를 불러오지 못했습니다. 현재 궤도 정보는 계속 표시됩니다. (${error.message})`);
-  }
-}
-
-function openSatelliteInspector(item, position, id) {
-  const inspector = $("#satellite-inspector");
-  if (!inspector) return;
-  inspector.hidden = false;
-  renderSatelliteInspectorBase(item, position, id);
-  loadSatelliteProfile(item, id);
+  label.textContent = tracking
+    ? "위성 추적 / 실제 축척 (휠: 거리, 멀리 축소하거나 Esc, 뷰 초기화: 해제)"
+    : globe?.viewer ? "지구 고정 좌표 / Cesium" : "2D 좌표도 / 바탕지도 미제공";
 }
 
 function hoverSatellite(payload) {
   const card = $("#satellite-hover-card");
-  if (!card || !payload?.item || !payload.screen) {
-    if (card) card.hidden = true;
-    lastHoverSatelliteId = null;
-    return;
-  }
-  const { item, position, id, screen } = payload;
-  if (lastHoverSatelliteId !== id) {
-    card.innerHTML = `<div class="hover-head"><span>HOVER</span><b>${escapeMarkup(item.OBJECT_NAME)}</b></div>
-      <dl><div><dt>NORAD</dt><dd>${escapeMarkup(id)}</dd></div><div><dt>궤도</dt><dd>${escapeMarkup(item.ORBIT_REGIME)}</dd></div>
-      <div><dt>고도</dt><dd>${position ? `${position.altitude.toFixed(0)} km` : "—"}</dd></div><div><dt>Epoch</dt><dd>${item.EPOCH_AGE_HOURS == null ? "—" : `${Number(item.EPOCH_AGE_HOURS).toFixed(1)} h`}</dd></div></dl>
-      <small>클릭하면 활성 위성으로 설정됩니다.</small>`;
-    lastHoverSatelliteId = id;
-  }
+  if (!payload?.item || !payload.screen) { card.hidden = true; return; }
+  card.innerHTML = `<b>${esc(payload.item.OBJECT_NAME)}</b><small>NORAD ${esc(payload.id)} / ${esc(payload.item.ORBIT_REGIME)} / ${displayNumber(payload.position?.altitude)} km</small>`;
+  const scene = card.parentElement;
   card.hidden = false;
-  const globeCard = card.closest(".globe-card");
-  const width = globeCard?.clientWidth || 700;
-  const height = globeCard?.clientHeight || 420;
-  const left = Math.max(8, Math.min(width - 217, screen.x + 14));
-  const top = screen.y + 126 > height ? Math.max(8, screen.y - 126) : screen.y + 14;
-  card.style.left = `${left}px`;
-  card.style.top = `${top}px`;
+  card.style.left = `${Math.max(6, Math.min(scene.clientWidth - card.offsetWidth - 8, payload.screen.x + 12))}px`;
+  card.style.top = `${Math.max(38, Math.min(scene.clientHeight - card.offsetHeight - 30, payload.screen.y + 48))}px`;
 }
 
-function revealSelectedSatellite(id) {
-  const list = $("#satellite-list");
-  const index = store.satellites.findIndex((item) => String(item.NORAD_CAT_ID) === String(id));
-  if (!list || index < 0) return;
-  if (list.classList.contains("virtualized")) {
-    list.scrollTop = Math.max(0, index * SATELLITE_ROW_HEIGHT - list.clientHeight / 2);
-    paintSatelliteWindow();
-    return;
-  }
-  const button = list.querySelector(`[data-satellite-id="${id}"]`);
-  if (button) list.scrollTop = Math.max(0, button.offsetTop - list.clientHeight / 2);
+// Satellites deployed from the node tab join the GP snapshot as explicit Kepler + J2 nodes. They are
+// listed after the catalog and never replace or mask a real GP object.
+function withDeployedNodes(items) {
+  return [...items, ...constellation.deployedItems()];
 }
 
-function statusFor(item) {
-  const age = Number(item.EPOCH_AGE_HOURS);
-  if (!Number.isFinite(age)) return { label: "GP 미확인", cls: "warning" };
-  if (age > 120) return { label: `GP ${Math.round(age)}h`, cls: "danger" };
-  if (age > 48) return { label: `GP ${Math.round(age)}h`, cls: "warning" };
-  return { label: `GP ${Math.round(age)}h`, cls: "success" };
+// Apply a catalog payload (GP snapshot plus deployed nodes) to the list, globe and inspector.
+async function applyCatalog(payload, token) {
+  ready = false;
+  invalidatePasses("새 GP 스냅샷을 적용하고 있습니다…");
+  catalog = payload;
+  catalogItems = withDeployedNodes(payload.items || []);
+  itemById = new Map(catalogItems.map(item => [String(item.NORAD_CAT_ID), item]));
+  store.livePositions.clear();
+  if (!itemById.has(selectedId)) { selectedId = null; store.selectedSatellite = null; inspector.clear(); showModel(null, null); }
+  else inspector.select(itemById.get(selectedId), catalog, clock.now());
+  setState({ satellites: catalogItems, satelliteSource: payload.source, satelliteCatalog: payload }, "satellites");
+  filterCatalog();
+  globe.currentDate = clock.now();
+  globe.selectedId = selectedId || (itemById.has("25544") ? "25544" : String(visibleItems[0]?.NORAD_CAT_ID || ""));
+  renderState = "loading";
+  const rendering = globe.setSatellites(catalogItems);
+  catalogRender = rendering;
+  rendering.then(
+    () => { if (catalogRender === rendering) renderState = "ready"; },
+    () => { if (catalogRender === rendering) renderState = "failed"; },
+  );
+  await rendering;
+  if (token !== requestToken) return;
+  ready = true;
+  list.select(selectedId, true);
+  updateFavorites();
+  renderCatalogStatus();
+  if (!catalogItems.length) $("#satellite-list").innerHTML = '<div class="oc-empty">카탈로그를 사용할 수 없습니다.<br>그룹 변경 또는 다시 조회를 시도하세요.</div>';
+  tick(true); schedulePasses();
 }
 
-function iconForSatellite(name) {
-  if (/ISS|TIANGONG|SPACE STATION/i.test(name)) return "▦";
-  if (/HST|HUBBLE/i.test(name)) return "◈";
-  return "✣";
-}
-
-function renderScenarios() {
-  const list = $("#scenario-list");
-  list.innerHTML = store.scenarios.map((scenario) => `
-    <button class="list-item ${scenario.id === store.runtime.scenario_id ? "active" : ""}" data-scenario-id="${scenario.id}">
-      <span class="status-dot ${scenario.status === "ready" ? "ok" : "warning"}"></span>
-      <span class="item-body"><b>${scenario.name}</b><small>${scenario.description}</small></span>
-      <span class="badge ${scenario.status === "ready" ? "success" : "warning"}">${scenario.status.toUpperCase()}</span>
-    </button>`).join("");
-  list.querySelectorAll("[data-scenario-id]").forEach((button) => button.addEventListener("click", async () => {
-    try {
-      const runtime = await api.selectScenario(button.dataset.scenarioId);
-      setState({ runtime }, "runtime"); renderScenarios(); emit("toast", { type: "success", title: "시나리오 로드", message: button.dataset.scenarioId });
-    } catch (error) { emit("toast", { type: "error", title: "시나리오 오류", message: error.message }); }
-  }));
-}
-
-function satelliteRow(item, index, top = null) {
-  const id = String(item.NORAD_CAT_ID || index + 1);
-  const status = statusFor(item);
-  const style = top == null ? "" : ` style="top:${top}px"`;
-  return `<button class="list-item ${store.selectedSatellite === id ? "active" : ""}" data-satellite-id="${id}"${style}>
-    <span class="entity-icon">${iconForSatellite(item.OBJECT_NAME)}</span>
-    <span class="item-body"><b>${item.OBJECT_NAME}</b><small>NORAD ${id}</small></span>
-    <span class="badge ${status.cls}">${status.label}</span>
-  </button>`;
-}
-
-function bindSatelliteRows(container) {
-  container.querySelectorAll("[data-satellite-id]").forEach((button) => button.addEventListener("click", () => globe?.select(button.dataset.satelliteId, true, { userInitiated: true })));
-}
-
-function paintSatelliteWindow() {
-  const list = $("#satellite-list");
-  if (!list.classList.contains("virtualized")) return;
-  const space = list.querySelector(".virtual-satellite-space");
-  if (!space) return;
-  const start = Math.max(0, Math.floor(list.scrollTop / SATELLITE_ROW_HEIGHT) - SATELLITE_ROW_BUFFER);
-  const visibleRows = Math.ceil((list.clientHeight || 420) / SATELLITE_ROW_HEIGHT) + SATELLITE_ROW_BUFFER * 2;
-  const end = Math.min(store.satellites.length, start + visibleRows);
-  space.innerHTML = store.satellites.slice(start, end).map((item, localIndex) => satelliteRow(item, start + localIndex, (start + localIndex) * SATELLITE_ROW_HEIGHT)).join("");
-  bindSatelliteRows(space);
-}
-
-function renderSatelliteList() {
-  const list = $("#satellite-list");
-  const items = store.satellites;
-  if (items.length > SATELLITE_VIRTUAL_THRESHOLD) {
-    const first = String(items[0]?.NORAD_CAT_ID || "");
-    const last = String(items.at(-1)?.NORAD_CAT_ID || "");
-    const catalogKey = `${items.length}:${first}:${last}`;
-    if (!list.classList.contains("virtualized") || list.dataset.catalogKey !== catalogKey) {
-      list.classList.add("virtualized");
-      list.dataset.catalogKey = catalogKey;
-      list.scrollTop = 0;
-      list.innerHTML = `<div class="virtual-satellite-space" style="height:${items.length * SATELLITE_ROW_HEIGHT}px"></div>`;
-    }
-    paintSatelliteWindow();
-  } else {
-    list.classList.remove("virtualized");
-    delete list.dataset.catalogKey;
-    list.innerHTML = items.map((item, index) => satelliteRow(item, index)).join("") || `<div class="empty-state">검색 결과 없음</div>`;
-    bindSatelliteRows(list);
-  }
-  $("#visible-satellite-count").textContent = `${items.length}/${store.satelliteCatalog.total || items.length} `;
-}
-
-function renderNodeStatus() {
-  const list = $("#node-status-list");
-  const labels = [
-    ["위성 본체", "▱", 100], ["자세 제어", "⌘", 100], ["전력 계통", "ϟ", Math.round(store.telemetry.power || 86)],
-    ["통신 장비", "⌁", Math.round(store.telemetry.link_quality || 96)], ["탑재체", "▣", 82], ["추진 시스템", "↗", 94], ["소프트웨어", "</>", 100],
-  ];
-  list.innerHTML = labels.map(([name, icon, value]) => `<article class="status-card"><span class="entity-icon">${icon}</span><span><b>${name}</b><small>${value >= 80 ? "정상" : value >= 60 ? "경고" : "이상"}</small></span><span class="percent" style="color:${value >= 80 ? "var(--green)" : value >= 60 ? "var(--orange)" : "var(--red)"}">${value}%</span></article>`).join("");
-}
-
-function selectedSatellite(item, position, id, context = {}) {
-  const changed = store.selectedSatellite !== id;
-  store.selectedSatellite = id;
-  if (changed) { renderSatelliteList(); revealSelectedSatellite(id); }
-  const inspector = $("#satellite-inspector");
-  if (context.userInitiated || (changed && inspector && !inspector.hidden)) openSatelliteInspector(item, position, id);
-  else updateSatelliteInspectorLive(position, id);
-  const activeStatus = $("#globe-selection-status");
-  if (activeStatus) {
-    activeStatus.hidden = false;
-    activeStatus.querySelector("b").textContent = item.OBJECT_NAME;
-  }
-  const meanMotion = Number(item.MEAN_MOTION || 15.2);
-  const period = Number(item.PERIOD_MINUTES || 1440 / meanMotion);
-  const inclination = Number(item.INCLINATION || item.inclination || 0);
-  $("#selected-satellite-name").textContent = item.OBJECT_NAME;
-  $("#selected-satellite-detail").innerHTML = `
-    <div><dt>NORAD</dt><dd>${id}</dd></div>
-    <div><dt>고도</dt><dd>${position ? position.altitude.toFixed(1) : "—"} km</dd></div>
-    <div><dt>위도</dt><dd>${position ? position.latitude.toFixed(2) : "—"}°</dd></div>
-    <div><dt>경도</dt><dd>${position ? position.longitude.toFixed(2) : "—"}°</dd></div>
-    <div><dt>원지점</dt><dd>${Number(item.APOGEE_KM || 0).toFixed(0)} km</dd></div>
-    <div><dt>근지점</dt><dd>${Number(item.PERIGEE_KM || 0).toFixed(0)} km</dd></div>
-    <div><dt>Epoch Age</dt><dd>${item.EPOCH_AGE_HOURS == null ? "—" : `${Number(item.EPOCH_AGE_HOURS).toFixed(1)} h`}</dd></div>
-    <div><dt>궤도</dt><dd>${item.ORBIT_REGIME || "—"}</dd></div>`;
-  $("#orbit-altitude").textContent = position ? position.altitude.toFixed(0) : "—";
-  $("#orbit-inclination").textContent = inclination ? inclination.toFixed(1) : "—";
-  $("#orbit-period").textContent = period.toFixed(1);
-  if (changed) renderPasses(true);
-  emit("satellite:selected", { item, position, id });
-}
-
-export async function loadSatellites(force = false) {
+export async function loadSatellites() {
+  const token = ++requestToken;
   const group = $("#satellite-group").value;
-  const orbit = $("#orbit-regime").value;
-  const query = $("#satellite-search").value.trim();
-  $("#satellite-refresh").classList.add("spinning");
+  $("#satellite-list").setAttribute("aria-busy", "true");
+  $("#catalog-source").textContent = `${group} 카탈로그 조회 중… 기존 화면은 마지막 스냅샷입니다.`;
+  $("#satellite-refresh").disabled = true;
   try {
-    const payload = await api.satellites({ group, limit: 0, query, orbit });
-    const catalog = { total: payload.total, filtered_total: payload.filtered_total, count: payload.count, fetched_at: payload.fetched_at, truncated: payload.truncated };
-    setState({ satellites: payload.items, satelliteSource: payload.source, satelliteCatalog: catalog }, "satellites");
-    await globe.setSatellites(payload.items);
-    renderSatelliteList();
-    renderCatalogSummary();
-    const chip = $("#source-chip");
-    const stale = payload.source === "celestrak-stale";
-    const live = payload.source === "celestrak-live" || payload.source === "celestrak-cache";
-    const unavailable = payload.source === "upstream-unavailable";
-    chip.innerHTML = `<span class="status-dot ${live ? "ok" : "warning"}"></span><span>${live ? "GP Snapshot · SGP4" : stale ? "Stale GP Snapshot" : unavailable ? "GP Snapshot 제한" : "Demo Fallback"} · ${Number(payload.total || 0).toLocaleString()}</span>`;
-    emit("toast", { type: live ? "success" : "warning", title: live ? "위성 카탈로그 준비" : stale ? "마지막 정상 스냅샷 사용" : unavailable ? "CelesTrak 갱신 제한" : "오프라인 대체 데이터", message: payload.warning || `전체 ${Number(payload.total || 0).toLocaleString()} · 표시 ${payload.count} · ${payload.source}` });
+    const payload = await api.satellites({ group, limit: 0 });
+    loading.report("catalog", 1);
+    if (token !== requestToken) return;
+    await applyCatalog(payload, token);
   } catch (error) {
-    emit("toast", { type: "error", title: "위성 데이터 오류", message: error.message });
-  } finally { $("#satellite-refresh").classList.remove("spinning"); }
+    if (token !== requestToken) return;
+    // A newer HTTP failure must not expose a partially assembled older
+    // response. Wait for the renderer that actually owns the visible snapshot.
+    await catalogRender.catch(() => {});
+    if (token !== requestToken) return;
+    ready = renderState === "ready" && catalogItems.length > 0;
+    renderCatalogStatus(error);
+    tick(true);
+    schedulePasses();
+  } finally {
+    if (token === requestToken) {
+      $("#satellite-refresh").disabled = false;
+      $("#satellite-list").setAttribute("aria-busy", "false");
+    }
+  }
 }
 
-function renderCatalogSummary() {
-  const catalog = store.satelliteCatalog;
-  const date = catalog.fetched_at ? new Date(catalog.fetched_at).toISOString().slice(5,16).replace("T"," ") : "—";
-  $("#catalog-summary").innerHTML = `<span>카탈로그<b>${Number(catalog.total || 0).toLocaleString()}</b></span><span>조건/표시<b>${Number(catalog.filtered_total || 0).toLocaleString()} / ${catalog.count || 0}</b></span><span>갱신 UTC<b>${date}</b></span>`;
+function renderCatalogStatus(error = null) {
+  const source = SOURCE_LABELS[catalog.source] || "출처 미확인";
+  $("#catalog-source").textContent = `${error ? "조회 실패 / 적용 스냅샷 유지: " : ""}${source} / ${catalogItems.length.toLocaleString()} 개 / 수집 UTC ${utcLabel(catalog.fetched_at, false)}`;
+  $("#catalog-source").title = error?.message || catalog.warning || "GP 캐시 2시간. 조회 버튼은 상류 강제 갱신을 의미하지 않습니다.";
+  const sourceChip = $("#source-chip");
+  if (sourceChip) sourceChip.textContent = catalog.source === "demo-fallback" ? "DEMO / 모의 궤도" : catalogItems.length ? `${catalogItems.length.toLocaleString()} objects / GP snapshot` : "GP 카탈로그 미제공";
+  renderTrackingState(modelLayer?.tracking === true);
 }
 
-function renderPasses(force = false) {
-  if (!globe || !store.selectedSatellite) return;
-  const station = $("#ground-station").value;
-  const bucket = Math.floor((store.runtime.elapsed_seconds || 0) / 300);
-  const key = `${store.selectedSatellite}:${station}:${bucket}`;
-  if (!force && key === lastPassKey) return;
-  lastPassKey = key;
-  const passes = globe.predictPasses(store.selectedSatellite, station, 24);
-  $("#pass-list").innerHTML = passes.length ? passes.map((pass) => {
-    const aos = pass.aos.toISOString().slice(11,16); const los = pass.los.toISOString().slice(11,16);
-    return `<div class="pass-item"><b>${aos}–${los}</b><span>${Math.floor(pass.durationSeconds/60)}m ${pass.durationSeconds%60}s</span><span>EL ${pass.maxElevation.toFixed(0)}°</span></div>`;
-  }).join("") : `<span>24시간 내 5° 이상 패스 없음</span>`;
+function renderClock() {
+  const date = clock.now();
+  $("#orbit-clock").textContent = utcLabel(date);
+  $("#orbit-clock").dateTime = date.toISOString();
+  $("#orbit-clock-mode").textContent = clock.isLive ? "현재 시각" : clock.running ? "시간 탐색" : "일시정지";
+  $("#orbit-pause").textContent = clock.running ? "Ⅱ" : "▶";
+  $("#orbit-pause").setAttribute("aria-label", clock.running ? "분석 시계 일시정지" : "분석 시계 재생");
+  $("#orbit-speed").value = String(clock.speed);
+  $("#orbit-now").setAttribute("aria-pressed", String(clock.isLive));
 }
+
+function renderObservation(position) {
+  const station = GROUND_STATIONS[$("#ground-station").value];
+  const look = position ? lookAnglesAt(position, station) : null;
+  const mask = Number($("#elevation-mask").value);
+  $("#observer-azimuth").textContent = displayNumber(look?.azimuth);
+  $("#observer-elevation").textContent = displayNumber(look?.elevation);
+  $("#observer-range").textContent = displayNumber(look?.rangeKm);
+  $("#station-coordinates").textContent = `${station.latitude.toFixed(4)}°, ${station.longitude.toFixed(4)}° / h = 0 km 가정`;
+  const visible = look !== null && look.elevation >= mask;
+  $("#observer-visibility").textContent = !selectedId ? "위성 미선택" : !look ? "전파값 미제공" : visible ? "마스크 이상" : "마스크 미만";
+  $("#observer-visibility").classList.toggle("visible", visible);
+  $("#observer-visibility").title = "지형, 대기 굴절, 날씨, 안테나와 링크 예산을 고려하지 않은 기하학적 판정입니다.";
+}
+
+// Ground-site card: site facts from the reference list plus live geometry of the selected body.
+function showStation(key) {
+  if (!GROUND_STATIONS[key]) return;
+  stationCardKey = key;
+  $("#station-card").hidden = false;
+  renderStationCard();
+  $("#station-card").scrollIntoView?.({ block: "nearest" });
+}
+
+function hideStation() {
+  stationCardKey = null;
+  $("#station-card").hidden = true;
+}
+
+function stationNextPass(site, mask) {
+  const cacheKey = selectedId ? `${selectedId}|${site.key}|${mask}|${passBasis}` : null;
+  if (stationPassCache.key === cacheKey) return stationPassCache.pass;
+  const pass = selectedId ? globe.predictPasses(selectedId, site.key, 24, { maskDegrees: mask, maxPasses: 1 })[0] || null : null;
+  stationPassCache = { key: cacheKey, pass };
+  return pass;
+}
+
+function renderStationCard() {
+  if (!stationCardKey) return;
+  const site = GROUND_STATIONS[stationCardKey];
+  if (!site) { hideStation(); return; }
+  const date = clock.now();
+  const mask = Number($("#elevation-mask").value);
+  const position = selectedId ? globe.positionAt(selectedId, date) : null;
+  const look = position ? lookAnglesAt(position, site) : null;
+  const model = stationCardModel(site, {
+    selectedName: selectedId ? itemById.get(selectedId)?.OBJECT_NAME || `NORAD ${selectedId}` : null,
+    look, maskDegrees: mask,
+    visibleCount: visibleSatelliteCount(globe.positions.values(), site, mask, (p, s) => globe.elevationAt(p, s)),
+    catalogCount: globe.positions.size,
+    nextPass: stationNextPass(site, mask),
+    isObserver: $("#ground-station").value === site.key,
+  });
+  $("#station-card-kicker").textContent = model.kicker;
+  $("#station-card-title").textContent = model.title;
+  $("#station-card-subtitle").textContent = model.subtitle;
+  $("#station-card-facts").innerHTML = model.facts.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("");
+  $("#station-card-live").innerHTML = model.live.map(([label, value]) => `<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("");
+  $("#station-card-state").dataset.state = model.state;
+  $("#station-card-state").textContent = { none: "위성 미선택", unknown: "전파값 미제공", visible: "가시", hidden: "비가시" }[model.state];
+  $("#station-card-note").textContent = model.note;
+  $("#station-card-observe").disabled = model.isObserver;
+  $("#station-card-observe").textContent = model.isObserver ? "현재 관측 기준" : "관측 기준으로 설정";
+}
+
+function populateStationSelect() {
+  const select = $("#ground-station");
+  const current = GROUND_STATIONS[select.value] ? select.value : "SEOUL";
+  select.innerHTML = stationOptionMarkup(stationGroups(GROUND_STATIONS), current);
+  select.value = current;
+}
+
+function invalidatePasses(message) {
+  clearTimeout(passTimer);
+  passRevision++;
+  passBasis = null;
+  $("#pass-list").innerHTML = `<tr><td colspan="5">${esc(message)}</td></tr>`;
+  $("#pass-timeline").replaceChildren();
+  $("#pass-reference").textContent = "—";
+}
+
+function schedulePasses() {
+  invalidatePasses("관측창 계산 중…");
+  const revision = passRevision;
+  passTimer = setTimeout(() => {
+    if (revision !== passRevision) return;
+    if (!ready || !selectedId || !globe.positionAt(selectedId, clock.now())) {
+      $("#pass-list").innerHTML = '<tr><td colspan="5">유효한 위성 전파값이 있어야 관측창을 계산할 수 있습니다.</td></tr>';
+      $("#pass-reference").textContent = "—";
+      return;
+    }
+    const station = $("#ground-station").value;
+    const mask = Number($("#elevation-mask").value);
+    const start = clock.now();
+    globe.currentDate = start;
+    let missingSamples = 0;
+    const passes = globe.predictPasses(selectedId, station, 24, {
+      maskDegrees: mask, maxPasses: 100,
+      onSample: position => { if (!position) missingSamples++; },
+    });
+    passBasis = start.getTime(); lastPassWall = Date.now();
+    $("#pass-reference").textContent = `${missingSamples ? "부분 계산 / " : ""}기준 ${utcLabel(start).slice(5)} UTC`;
+    $("#pass-reference").title = missingSamples ? `전파 결측 ${missingSamples}개. 전체 24시간의 관측창 가용성을 보장하지 않습니다.` : "지형과 굴절을 제외한 좌표 기반 예측입니다.";
+    $("#pass-list").innerHTML = passes.length ? passes.map(pass => {
+      const boundary = pass.inProgress ? "진행 중*" : pass.truncated ? "부분 구간*" : "완전";
+      const aos = utcLabel(pass.aos).slice(5), los = utcLabel(pass.los).slice(5);
+      return `<tr><td><button data-pass-time="${pass.aos.getTime()}" title="${esc(aos)} UTC로 이동">${esc(aos)}</button></td><td>${esc(los)}</td><td>${displayNumber(pass.maxElevation)}°</td><td>${Math.floor(pass.durationSeconds / 60)}m ${Math.round(pass.durationSeconds % 60)}s</td><td title="* 검색창 경계 또는 전파 결측으로 실제 AOS/LOS가 확인되지 않은 구간">${boundary}</td></tr>`;
+    }).join("") : `<tr><td colspan="5">${missingSamples ? "전파 결측으로 24시간 관측창 여부를 판정할 수 없습니다." : `24시간 내 ${mask}° 이상 관측창 없음`}</td></tr>`;
+    $("#pass-timeline").innerHTML = passes.map(pass => `<button data-pass-time="${pass.aos.getTime()}" style="left:${Math.max(0, (pass.aos - start) / 86400000 * 100)}%;width:${Math.min(100, pass.durationSeconds / 86400 * 100)}%" title="${esc(utcLabel(pass.aos))} UTC / 최대 고각 ${displayNumber(pass.maxElevation)}°" aria-label="${esc(utcLabel(pass.aos))} 관측창으로 이동"></button>`).join("");
+  }, 100);
+}
+
+function tick(force = false) {
+  if (!clock) return;
+  renderClock();
+  if (!ready || (store.activeTab !== "orbit" && !force)) return;
+  const date = clock.now();
+  // The trajectory is sampled densely only around its reference time, so rebuild inside that window.
+  const rebuild = force || lastPathTime === null || Math.abs(date.getTime() - lastPathTime) > 30000;
+  globe.update(date, rebuild);
+  modelLayer?.update(date);
+  if (rebuild) lastPathTime = date.getTime();
+  const position = selectedId ? globe.positionAt(selectedId, date) : null;
+  inspector.update(position, date, { libraryAvailable: !!globe.satelliteLib });
+  renderObservation(position);
+  renderStationCard();
+  $("#orbit-locate").disabled = !position || !globe.viewer;
+  const failed = catalogItems.length - globe.positions.size;
+  $("#orbit-status").textContent = failed > 0 ? `전파 미제공 ${failed.toLocaleString()} / 실측 아님` : "기하학적 예측 / 실측 텔레메트리 아님";
+  if (passBasis !== null && Math.abs(date.getTime() - passBasis) >= 300000 && Date.now() - lastPassWall > 5000) schedulePasses();
+  if (Date.now() - lastListPaint >= 60000) { list.paint(); lastListPaint = Date.now(); }
+}
+
+function changeTime(action) { action(); tick(true); schedulePasses(); }
 
 function bindControls() {
-  $("#satellite-search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => loadSatellites(false), 450); });
-  $("#satellite-group").addEventListener("change", () => loadSatellites(false));
-  $("#orbit-regime").addEventListener("change", () => loadSatellites(false));
-  $("#satellite-refresh").addEventListener("click", () => loadSatellites(false));
-  $("#satellite-list").addEventListener("scroll", () => {
-    if (!$("#satellite-list").classList.contains("virtualized") || satelliteListFrame) return;
-    satelliteListFrame = requestAnimationFrame(() => { satelliteListFrame = 0; paintSatelliteWindow(); });
+  $("#satellite-search").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(filterCatalog, 100); });
+  $("#satellite-group").addEventListener("change", loadSatellites);
+  document.querySelectorAll("[data-orbit-regime]").forEach(button => button.addEventListener("click", () => {
+    orbitRegime = button.dataset.orbitRegime || "all";
+    document.querySelectorAll("[data-orbit-regime]").forEach(other => other.setAttribute("aria-pressed", String(other === button)));
+    filterCatalog();
+  }));
+  // A theme change resets the globe's lighting flags, so the day/night preference is re-applied after it.
+  window.addEventListener("spacetwin:themechange", event => { globe?.setTheme(event.detail?.theme); lighting?.apply(); });
+  $("#satellite-refresh").addEventListener("click", loadSatellites);
+  $("#favorites-only").addEventListener("click", event => {
+    favoritesOnly = !favoritesOnly;
+    event.currentTarget.setAttribute("aria-pressed", String(favoritesOnly)); filterCatalog();
   });
-  $("#ground-station").addEventListener("change", () => renderPasses(true));
-  $("#satellite-inspector-close").addEventListener("click", () => {
-    profileRequestToken += 1;
-    $("#satellite-inspector").hidden = true;
+  $("#selected-favorite").addEventListener("click", () => {
+    if (!selectedId) return;
+    if (favorites.has(selectedId)) favorites.delete(selectedId); else favorites.add(selectedId);
+    try { localStorage.setItem(FAVORITES_KEY, JSON.stringify([...favorites])); } catch { /* Session-only favorites when storage is unavailable. */ }
+    updateFavorites(); filterCatalog();
   });
-  $("#profile-track").addEventListener("click", () => {
-    if (store.selectedSatellite) globe?.select(store.selectedSatellite, true, { userInitiated: false });
+  document.querySelectorAll("[data-catalog-sort]").forEach(button => button.addEventListener("click", () => {
+    if (sort === button.dataset.catalogSort) direction = direction === "asc" ? "desc" : "asc";
+    else { sort = button.dataset.catalogSort; direction = "asc"; }
+    filterCatalog();
+  }));
+  $("#orbit-pause").addEventListener("click", () => changeTime(() => clock.running ? clock.pause() : clock.play()));
+  $("#orbit-now").addEventListener("click", () => changeTime(() => clock.live()));
+  $("#orbit-back").addEventListener("click", () => changeTime(() => clock.step(-60)));
+  $("#orbit-forward").addEventListener("click", () => changeTime(() => clock.step(60)));
+  $("#orbit-speed").addEventListener("change", event => changeTime(() => clock.setSpeed(Number(event.target.value))));
+  $("#orbit-seek-open").addEventListener("click", () => {
+    $("#orbit-seek-form").hidden = false;
+    $("#orbit-seek-input").value = clock.now().toISOString().slice(0, 19);
+    $("#orbit-seek-input").focus();
   });
-  $("#profile-home").addEventListener("click", () => globe?.home());
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && !$("#satellite-inspector").hidden) {
-      profileRequestToken += 1;
-      $("#satellite-inspector").hidden = true;
-    }
+  $("#orbit-seek-cancel").addEventListener("click", () => { $("#orbit-seek-form").hidden = true; });
+  $("#orbit-seek-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const date = new Date(`${$("#orbit-seek-input").value}Z`);
+    if (!Number.isFinite(date.getTime())) return;
+    changeTime(() => clock.seek(date)); $("#orbit-seek-form").hidden = true;
   });
-  $("#imagery-layer").addEventListener("change", async (event) => {
-    const applied = await globe.setImagery(event.target.value);
-    event.target.value = applied;
-    emit("toast", { type: "success", title: "지도 레이어 전환", message: applied === "satellite" ? "Esri World Imagery" : applied });
+  for (const id of ["#ground-station", "#elevation-mask"]) $(id).addEventListener("change", () => {
+    globe.setObserver($("#ground-station").value, Number($("#elevation-mask").value));
+    tick(true); schedulePasses();
   });
-  $("#scenario-reset").addEventListener("click", async () => {
-    const runtime = await api.runtimeControl("reset"); setState({ runtime }, "runtime"); renderScenarios();
+  $("#station-card-close").addEventListener("click", hideStation);
+  $("#station-card-fly").addEventListener("click", () => { if (stationCardKey) globe.flyToStation(stationCardKey); });
+  $("#station-card-observe").addEventListener("click", () => {
+    if (!stationCardKey) return;
+    $("#ground-station").value = stationCardKey;
+    $("#ground-station").dispatchEvent(new Event("change"));
   });
-  $("#runtime-toggle").addEventListener("click", async () => {
-    const action = store.runtime.running ? "pause" : "start";
-    const runtime = await api.runtimeControl(action); setState({ runtime }, "runtime"); updateRuntimeControls();
+  $("#pass-refresh").addEventListener("click", schedulePasses);
+  $("#view-orbit").addEventListener("click", event => {
+    const button = event.target.closest("[data-pass-time]");
+    if (button) changeTime(() => clock.seek(new Date(Number(button.dataset.passTime))));
   });
-  $("#runtime-reset").addEventListener("click", async () => {
-    const runtime = await api.runtimeControl("reset"); setState({ runtime }, "runtime"); updateRuntimeControls();
-  });
-  $("#runtime-speed").addEventListener("change", async (event) => {
-    const runtime = await api.runtimeSpeed(event.target.value); setState({ runtime }, "runtime"); emit("toast", { type: "success", title: "시뮬레이션 배속", message: `${runtime.speed}x` });
-  });
-  $("#fault-button").addEventListener("click", () => $("#fault-dialog").showModal());
-  document.querySelectorAll("[data-globe-mode]").forEach((button) => button.addEventListener("click", () => {
+  $("#imagery-layer").addEventListener("change", async event => { event.target.value = await globe.setImagery(event.target.value); });
+  document.querySelectorAll("[data-globe-mode]").forEach(button => button.addEventListener("click", () => {
     const mode = button.dataset.globeMode;
-    if (mode === "home") globe.home();
-    if (mode === "selected" && store.selectedSatellite) globe.select(store.selectedSatellite, true, { userInitiated: true });
-    if (mode === "tracks") button.classList.toggle("active", globe.toggleTracks());
-    if (mode === "labels") button.classList.toggle("active", globe.toggleLabels());
-    if (mode === "contrast") {
-      const enabled = globe.toggleEmphasis();
-      button.classList.toggle("active", enabled);
-      emit("toast", { type: "success", title: "위성 강조 필터", message: enabled ? "지구 감광 필터 ON" : "원본 지도 밝기" });
-    }
+    if (mode === "home") { clearSelection(); globe.home(); }
+    if (mode === "selected" && selectedId) globe.select(selectedId, false, { userInitiated: true, focus: true });
+    if (mode === "tracks") button.setAttribute("aria-pressed", String(globe.toggleTracks()));
+    if (mode === "labels") button.setAttribute("aria-pressed", String(globe.toggleLabels()));
   }));
-  document.querySelectorAll("[data-scene-mode]").forEach((button) => button.addEventListener("click", () => {
-    document.querySelectorAll("[data-scene-mode]").forEach((item) => item.classList.toggle("active", item === button));
-    globe.setSceneMode(button.dataset.sceneMode);
+  document.querySelectorAll("[data-scene-mode]").forEach(button => button.addEventListener("click", async () => {
+    document.querySelectorAll("[data-scene-mode]").forEach(other => other.setAttribute("aria-pressed", String(other === button)));
+    modelLayer?.untrack();
+    await globe.setSceneMode(button.dataset.sceneMode);
+    renderTrackingState(modelLayer?.tracking === true);
   }));
-}
-
-function updateRuntimeControls() {
-  $("#runtime-toggle").textContent = store.runtime.running ? "Ⅱ" : "▶";
-  $("#runtime-speed").value = String(store.runtime.speed || 1);
-  const seconds = store.runtime.elapsed_seconds || 0;
-  const h = Math.floor(seconds / 3600); const m = Math.floor(seconds % 3600 / 60); const s = Math.floor(seconds % 60); const ms = Math.floor(seconds % 1 * 1000);
-  $("#simulation-time").textContent = `T+${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}.${String(ms).padStart(3,"0")}`;
-  $("#time-slider").value = String((seconds / 25) % 100);
+  document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && store.activeTab === "orbit") modelLayer?.untrack({ aimAtEarth: true });
+  });
+  // A deployment from the node tab re-applies the current snapshot with the new node set.
+  on("nodes:deployed", () => {
+    if (!catalog.items) return;
+    const token = ++requestToken;
+    $("#satellite-list").setAttribute("aria-busy", "true");
+    applyCatalog(catalog, token).catch(error => console.warn("deployed nodes could not be applied", error))
+      .finally(() => { if (token === requestToken) $("#satellite-list").setAttribute("aria-busy", "false"); });
+  });
 }
 
 export async function initOrbit() {
-  renderScenarios(); renderNodeStatus(); bindControls(); updateRuntimeControls();
+  loadFavorites(); clock = new OrbitClock();
+  inspector = createInspector({ root: $("#orbit-inspector"), loadProfile: id => api.satelliteProfile(id) });
+  inspector.clear();
+  list = createCatalogList({ element: $("#satellite-list"), onSelect: (id, fly) => globe?.select(id, false, { userInitiated: true, focus: fly }) });
   globe = new GlobeController($("#cesium-container"), $("#globe-fallback"), {
-    onSelect: selectedSatellite,
-    onPosition: (id, position) => store.livePositions.set(id, position),
-    onHover: hoverSatellite,
+    onSelect: selectSatellite, onHover: hoverSatellite,
+    onPosition: (id, position) => position ? store.livePositions.set(id, position) : store.livePositions.delete(id),
     sunElement: $("#space-sun"),
+    onProgress: (phase, fraction, detail) => loading.report(phase, fraction, detail),
+    stations: GROUND_STATIONS,
+    onStationSelect: showStation,
   });
+  modelLayer = new SatelliteModelLayer({
+    viewer: () => globe.viewer, timeSource: () => clock.now(), onTrackingChange: renderTrackingState,
+    isTransitioning: () => globe.sceneTransitioning,
+    onCameraInput: () => globe.cancelCameraMotion(),
+    // Keep the marker, label and observer line on the model between the once-per-second ticks.
+    onFrame: date => globe.syncSelected(date),
+  });
+  globe.wheelOverride = delta => modelLayer.zoomBy(delta);
+  globe.onCameraInput = () => modelLayer.interruptCamera();
+  globe.onCameraMove = () => modelLayer.untrack();
+  loadSatelliteModels().then(manifest => {
+    loading.report("models", 1);
+    if (!manifest) return;
+    resolveModel = createModelResolver(manifest);
+    if (selectedId && itemById.has(selectedId)) showModel(itemById.get(selectedId), selectedId);
+  });
+  populateStationSelect(); bindControls(); renderClock(); renderObservation(null); renderShape(null);
   const result = await globe.init();
+  const zoomControls = bindZoomControls({ slider: $("#orbit-zoom"), zoomIn: $("#orbit-zoom-in"), zoomOut: $("#orbit-zoom-out") }, globe, modelLayer);
+  const removeZoomSync = globe.viewer?.scene.postRender.addEventListener(zoomControls.sync);
+  window.addEventListener("pagehide", () => removeZoomSync?.(), { once: true });
+  globe.setTheme(document.documentElement?.dataset?.theme);
+  lighting = bindLightingToggle($("#orbit-lighting"), () => globe);
+  lighting.apply();
   $("#globe-loading").classList.add("hidden");
-  if (result.mode === "fallback") emit("toast", { type: "warning", title: "2D 지구 대체 모드", message: "CesiumJS 연결을 확인하세요." });
-  await loadSatellites(false);
+  if (result.mode === "fallback") {
+    $("#render-mode").textContent = "2D 좌표도 / 바탕지도 미제공";
+    $("#imagery-layer").disabled = true;
+    document.querySelectorAll('[data-scene-mode], [data-globe-mode="home"], [data-globe-mode="tracks"]').forEach(button => { button.disabled = true; });
+  }
+  await loadSatellites();
+  tickTimer = setInterval(() => tick(), 1000);
+  window.addEventListener("pagehide", () => { clearInterval(tickTimer); clearTimeout(passTimer); clearTimeout(searchTimer); });
 }
 
-export function updateOrbitTelemetry(payload) {
-  store.runtime = payload.runtime || store.runtime;
-  store.telemetry = payload.telemetry || store.telemetry;
-  updateRuntimeControls(); renderNodeStatus();
-  const t = store.telemetry;
-  $("#power-value").textContent = `${Math.round(t.power || 0)}%`;
-  $("#temperature-value").textContent = `${Number(t.temperature || 0).toFixed(1)}°C`;
-  $("#storage-value").textContent = `${Math.round(t.storage || 0)}%`;
-  $("#downlink-value").textContent = `${Number(t.throughput_mbps || 0).toFixed(1)} Mbps`;
-  $("#uplink-value").textContent = `${Math.max(0, Number(t.throughput_mbps || 0) * .31).toFixed(1)} Mbps`;
-  drawSparkline($("#uplink-spark"), pushHistory("uplink", (t.throughput_mbps || 0) * .31), "#2d7ff9");
-  drawSparkline($("#downlink-spark"), pushHistory("downlink", t.throughput_mbps || 0), "#2d7ff9");
-  drawSparkline($("#telemetry-spark"), pushHistory("power", t.power || 0), "#12a36d");
-  const visibility = Math.max(10, Math.min(100, Math.round(t.link_quality || 78)));
-  $("#visibility-ring").style.setProperty("--value", visibility); $("#visibility-ring strong").textContent = `${visibility}%`;
-  const scenarioDate = new Date(new Date(store.runtime.started_at || Date.now()).getTime() + (store.runtime.elapsed_seconds || 0) * 1000);
-  if (store.activeTab === "orbit") {
-    globe?.update(scenarioDate);
-    if (++pathRefreshCounter % 120 === 0) globe?.update(scenarioDate, true);
-  }
-  if (store.selectedSatellite) {
-    const entry = store.satellites.find((item) => String(item.NORAD_CAT_ID) === store.selectedSatellite);
-    const position = store.livePositions.get(store.selectedSatellite);
-    if (entry && position) selectedSatellite(entry, position, store.selectedSatellite);
-  }
-}
+// Server telemetry intentionally has no authority over the orbit analysis cursor.
+export function updateOrbitTelemetry() {}

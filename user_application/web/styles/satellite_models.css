@@ -1,0 +1,10 @@
+/* NASA 3D Resources shape block inside the orbit inspector. */
+#view-orbit .oc-shape h3 span[data-quality="exact"] { color: var(--green); }
+#view-orbit .oc-shape h3 span[data-quality="series"] { color: var(--oc-accent); }
+#view-orbit .oc-shape h3 span[data-quality="representative"] { color: var(--orange); }
+#view-orbit .oc-shape-figure { margin: 0; display: grid; gap: 6px; }
+#view-orbit .oc-shape-figure img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border: 1px solid var(--line); border-radius: 3px; background: #06101b; }
+#view-orbit .oc-shape-figure figcaption { display: grid; gap: 3px; }
+#view-orbit .oc-shape-figure b { font-size: 11px; font-weight: 600; overflow-wrap: anywhere; }
+#view-orbit .oc-shape-figure small { font-size: 9px; line-height: 1.6; color: var(--muted); }
+#view-orbit .oc-shape-figure a { font-size: 9px; color: var(--oc-accent); text-decoration: none; justify-self: start; }

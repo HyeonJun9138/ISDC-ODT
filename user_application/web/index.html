@@ -6,6 +6,12 @@
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" id="theme-color" content="#e9eef5">
   <title>SpaceTwin VVP</title>
+  <script id="loading-background">
+    (() => {
+      const image = Math.floor(Math.random() * 2) + 1;
+      document.documentElement.style.setProperty("--loading-background", `url("/static/assets/loading/loading_${image}.png")`);
+    })();
+  </script>
   <script>
     (() => {
       const saved = localStorage.getItem("spacetwin-theme");
@@ -17,301 +23,399 @@
   <script>window.CESIUM_BASE_URL='https://cesium.com/downloads/cesiumjs/releases/1.143/Build/Cesium/';</script>
   <link rel="stylesheet" href="https://cesium.com/downloads/cesiumjs/releases/1.143/Build/Cesium/Widgets/widgets.css">
   <link rel="stylesheet" href="/static/styles/tokens.css">
-  <link rel="stylesheet" href="/static/styles/app.css">
+  <link rel="stylesheet" href="/static/styles/app.css?v=20260908-1">
   <link rel="stylesheet" href="/static/styles/components.css">
   <link rel="stylesheet" href="/static/styles/views.css?v=20260907-1">
   <link rel="stylesheet" href="/static/styles/responsive.css">
   <link rel="stylesheet" href="/static/styles/theme.css">
+  <link rel="stylesheet" href="/static/styles/orbit.css?v=20260907-8">
+  <link rel="stylesheet" href="/static/styles/satellite_models.css">
+  <link rel="stylesheet" href="/static/styles/tabs.css?v=20260908-topology-fit1">
+  <link rel="stylesheet" href="/static/styles/nodes.css?v=20260907-4">
+  <link rel="stylesheet" href="/static/styles/data_management.css?v=20260907-1">
+  <link rel="stylesheet" href="/static/styles/communication.css?v=20260908-ring-diagram2">
+  <link rel="stylesheet" href="/static/styles/mission.css">
+  <link rel="stylesheet" href="/static/styles/map_controls.css?v=20260908-1">
+  <link rel="stylesheet" href="/static/styles/security.css?v=20260908-1">
+  <link rel="stylesheet" href="/static/styles/scenario.css?v=20260908-2">
   <script defer src="https://cesium.com/downloads/cesiumjs/releases/1.143/Build/Cesium/Cesium.js"></script>
 </head>
 <body>
   <div class="app-shell" id="app">
     <header class="topbar surface">
-      <button class="brand icon-button" aria-label="홈" data-tab-target="orbit">
-        <span class="brand-cube"><i></i><i></i><i></i></span>
-      </button>
       <nav class="main-nav" aria-label="주요 화면">
-        <button class="nav-tab active" data-tab-target="orbit"><span>궤도</span></button>
+        <button class="nav-tab active" data-tab-target="orbit"><span>대시보드</span></button>
+        <button class="nav-tab" data-tab-target="nodes"><span>노드</span></button>
         <button class="nav-tab" data-tab-target="communication"><span>통신</span></button>
+        <button class="nav-tab" data-tab-target="data"><span>데이터</span></button>
+        <button class="nav-tab" data-tab-target="security"><span>보안</span></button>
         <button class="nav-tab" data-tab-target="mission"><span>임무</span></button>
-        <button class="nav-tab" data-tab-target="analysis"><span>분석</span></button>
-        <button class="nav-tab" data-tab-target="hil"><span>시험</span></button>
+        <button class="nav-tab" data-tab-target="status"><span>상태</span></button>
+        <button class="nav-tab" data-tab-target="settings"><span>설정</span></button>
       </nav>
+      <div class="topbar-center">
+        <h1 class="app-title">Space Data Center Operational Digital Twin</h1>
+        <div class="topbar-clock" aria-label="현재 UTC"><time id="utc-clock">--:--:--</time><span>UTC</span></div>
+      </div>
       <div class="topbar-actions">
-        <div class="run-chip" id="run-chip"><span class="badge info" id="run-mode">SIM</span><span><b id="run-id">RUN-—</b><small id="run-context">SCN · v—</small></span><i class="record-dot" id="record-dot"></i></div>
-        <div class="source-chip" id="source-chip"><span class="status-dot warning"></span><span>데이터 확인 중</span></div>
+        <button type="button" class="scenario-chip" id="scenario-button" aria-haspopup="dialog" title="PoC 시나리오를 고르고 세팅한 뒤 재생합니다"><i>▶</i><span>시나리오</span><small id="scenario-chip-state">선택 안 함</small></button>
+        <div class="run-chip" id="run-chip" role="button" tabindex="0" title="현재 실행과 시나리오"><span class="badge info" id="run-mode">SIM</span><span><b id="run-id">RUN-—</b><small id="run-context">SCN · v—</small></span><i class="record-dot" id="record-dot"></i></div>
         <button class="icon-button" id="theme-toggle" title="다크 모드" aria-label="다크 모드로 전환">☾</button>
         <button class="icon-button" id="fullscreen-button" title="전체 화면" aria-label="전체 화면">⛶</button>
-        <div class="clock-chip"><strong id="utc-clock">--:--:--</strong><span>UTC</span></div>
       </div>
     </header>
 
     <main class="workspace">
       <!-- ORBIT -->
-      <section class="tab-view active" id="view-orbit" data-view="orbit">
-        <aside class="orbit-left stack">
-          <section class="surface panel scenario-panel">
-            <div class="panel-head"><h2>시나리오</h2><button class="small-icon" id="scenario-reset" title="시나리오 초기화">↺</button></div>
-            <div id="scenario-list" class="compact-list"></div>
-          </section>
-          <section class="surface panel satellite-panel">
-            <div class="panel-head"><h2>위성 목록</h2><button class="small-icon" id="satellite-refresh" title="실시간 데이터 갱신">↻</button></div>
-            <div class="filter-row">
-              <input id="satellite-search" class="field" type="search" placeholder="위성 검색">
-              <select id="satellite-group" class="field compact" aria-label="위성 그룹">
-                <option value="stations">유인 우주체</option>
-                <option value="active" selected>전체 활성 위성</option>
-                <option value="last30">최근 30일 발사</option>
-                <option value="visual">주요 관측 위성</option>
-                <option value="weather">기상</option>
-                <option value="resource">지구관측</option>
-                <option value="geo">정지궤도</option>
-                <option value="starlink">Starlink</option>
-                <option value="oneweb">OneWeb</option>
-                <option value="cubesat">CubeSat</option>
-                <option value="science">과학</option>
-                <option value="gps">GPS</option>
-                <option value="glonass">GLONASS</option>
-                <option value="galileo">Galileo</option>
-                <option value="beidou">BeiDou</option>
-                <option value="gnss">전체 GNSS</option>
-              </select>
-            </div>
-            <div class="catalog-filter-row">
-              <select id="orbit-regime" class="field compact" aria-label="궤도 구분"><option value="all">전체 궤도</option><option value="LEO">LEO</option><option value="MEO">MEO</option><option value="GEO">GEO</option><option value="HEO">HEO</option></select>
-              <span class="catalog-all-indicator"><i class="status-dot ok"></i>필터 결과 전체 표시</span>
-            </div>
-            <div class="catalog-summary" id="catalog-summary"><span>카탈로그 <b>—</b></span><span>표시 <b>—</b></span><span>갱신 <b>—</b></span></div>
-            <div id="satellite-list" class="entity-list scroll-area"><div class="skeleton-list"></div></div>
-          </section>
+      <section class="tab-view active orbit-console" id="view-orbit" data-view="orbit" aria-label="궤도 분석">
+        <aside class="oc-catalog oc-panel" aria-label="위성 카탈로그">
+          <header class="oc-heading"><h2>위성 카탈로그</h2><button id="satellite-refresh" title="캐시 정책에 따라 카탈로그 다시 조회" aria-label="카탈로그 다시 조회">↻</button></header>
+          <div class="oc-filters">
+            <input id="satellite-search" type="search" placeholder="위성명, NORAD, COSPAR 검색" aria-label="위성 검색" autocomplete="off">
+            <select id="satellite-group" aria-label="위성 그룹">
+              <option value="active" selected>전체 활성 위성</option><option value="stations">유인 우주체</option><option value="last30">최근 30일 발사</option><option value="visual">주요 관측 위성</option><option value="weather">기상</option><option value="resource">지구관측</option><option value="geo">정지궤도</option><option value="starlink">Starlink</option><option value="oneweb">OneWeb</option><option value="cubesat">CubeSat</option><option value="science">과학</option><option value="gps">GPS</option><option value="glonass">GLONASS</option><option value="galileo">Galileo</option><option value="beidou">BeiDou</option><option value="gnss">전체 GNSS</option>
+            </select>
+            <div class="oc-regime" role="group" aria-label="궤도 구분"><button data-orbit-regime="all" aria-pressed="true" title="모든 궤도">전체</button><button data-orbit-regime="LEO" aria-pressed="false" title="LEO · 저궤도">저궤도</button><button data-orbit-regime="MEO" aria-pressed="false" title="MEO · 중궤도">중궤도</button><button data-orbit-regime="GEO" aria-pressed="false" title="GEO · 지구동기궤도">지구동기</button><button data-orbit-regime="HEO" aria-pressed="false" title="HEO · 고타원궤도">고타원</button><button data-orbit-regime="SDC" aria-pressed="false" title="SDC · 노드 탭에서 배치한 내 위성만 표시">SDC</button></div>
+            <button id="favorites-only" aria-pressed="false">☆ 관심 위성</button>
+          </div>
+          <div class="oc-list-summary"><span id="catalog-count">카탈로그 조회 중</span><span id="catalog-sort-label">이름순</span></div>
+          <div class="oc-list-head" aria-label="목록 정렬">
+            <span aria-hidden="true">☆</span><button data-catalog-sort="name" aria-label="위성명 정렬">위성명 <i>↑</i></button><button data-catalog-sort="id" aria-label="NORAD 정렬">NORAD <i></i></button><button data-catalog-sort="orbit" aria-label="궤도군 정렬">궤도 <i></i></button><button data-catalog-sort="age" aria-label="Epoch 경과 정렬">Δt h <i></i></button>
+          </div>
+          <div id="satellite-list" class="oc-list" tabindex="0" role="listbox" aria-label="위성 목록" aria-busy="true"><div class="oc-empty">카탈로그를 불러오는 중입니다.</div></div>
+          <footer class="oc-catalog-foot"><span>↑↓ 선택 / Enter 뷰 정렬</span><span>Δt: 현재 UTC − Epoch</span></footer>
         </aside>
 
-        <section class="orbit-center stack">
-          <section class="surface globe-card">
-            <div class="globe-toolbar floating-toolbar left">
-              <button class="tool-button active" data-globe-mode="home" title="전체 위성 맞춤">◎</button>
-              <button class="tool-button" data-globe-mode="selected" title="선택 위성 추적">⌖</button>
-              <button class="tool-button" data-globe-mode="tracks" title="궤도선 표시">⌁</button>
-              <button class="tool-button" data-globe-mode="labels" title="라벨 표시">Aa</button>
-              <button class="tool-button active" data-globe-mode="contrast" title="지구 감광 · 위성 강조">◐</button>
+        <section class="oc-scene globe-card" aria-label="궤도 시각화">
+          <header class="oc-scene-toolbar">
+            <div><button data-globe-mode="home" title="뷰 초기화: 추적을 풀고 지구 전체 보기">뷰 초기화</button><button data-globe-mode="tracks" aria-pressed="true" title="선택 궤적과 관측선 표시">궤적</button></div>
+            <div><button id="orbit-lighting" class="map-lighting" aria-pressed="true" title="해 방향 음영 끄기: 지구 전체를 해가 비추는 쪽과 같은 밝기로 봅니다" aria-label="해 방향 음영 끄기: 지구 전체를 해가 비추는 쪽과 같은 밝기로 봅니다">☀</button><select id="imagery-layer" aria-label="지도 레이어"><option value="satellite">위성 지도</option><option value="natural">기본 지도</option><option value="osm">OSM</option></select><button data-scene-mode="3d" aria-pressed="true">3D</button><button data-scene-mode="2d" aria-pressed="false">2D</button></div>
+          </header>
+          <div id="cesium-container" class="globe-container"></div><canvas id="globe-fallback" class="globe-fallback" hidden></canvas>
+          <div id="space-sun" hidden aria-hidden="true"></div>
+          <div class="map-controls" role="group" aria-label="지도 뷰 제어">
+            <button id="orbit-locate" class="map-focus" data-globe-mode="selected" title="뷰 정렬: 선택 위성을 중앙에 두고 실제 크기로 확대" aria-label="뷰 정렬" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg>
+            </button>
+            <div class="map-zoom">
+              <button id="orbit-zoom-in" title="확대" aria-label="지도 확대" disabled>+</button>
+              <input id="orbit-zoom" class="map-zoom-slider" type="range" min="0" max="100" step="0.1" value="50" aria-label="지도 확대 수준" aria-orientation="vertical" disabled>
+              <button id="orbit-zoom-out" title="축소" aria-label="지도 축소" disabled>−</button>
             </div>
-            <div class="floating-toolbar right globe-layer-controls">
-              <select id="imagery-layer" class="field compact" aria-label="지도 레이어"><option value="satellite" selected>World Imagery</option><option value="natural">Natural Earth</option><option value="osm">OSM 지도</option></select>
-              <div class="segmented" aria-label="장면 모드"><button class="active" data-scene-mode="3d">3D</button><button data-scene-mode="2d">2D</button></div>
-            </div>
-            <div class="orbit-color-legend" aria-label="위성 궤도 색상 범례">
-              <span><i class="leo"></i>LEO</span><span><i class="meo"></i>MEO</span><span><i class="geo"></i>GEO</span><span><i class="heo"></i>HEO</span><span><i class="selected"></i>선택</span>
-            </div>
-            <div id="cesium-container" class="globe-container"></div>
-            <canvas id="globe-fallback" class="globe-fallback" hidden></canvas>
-            <div id="space-sun" class="space-sun" hidden aria-hidden="true"></div>
-            <div id="satellite-hover-card" class="satellite-hover-card" hidden></div>
-            <aside id="satellite-inspector" class="satellite-inspector" hidden aria-label="선택 위성 상세정보" aria-live="polite">
-              <header class="satellite-inspector-head">
-                <div>
-                  <span class="satellite-profile-kicker"><i id="profile-status-dot"></i><span id="profile-status">SATCAT 조회 중</span></span>
-                  <h3 id="profile-name">위성을 선택하세요</h3>
-                  <p><span id="profile-norad">NORAD —</span><b>·</b><span id="profile-cospar">COSPAR —</span></p>
-                </div>
-                <button id="satellite-inspector-close" type="button" aria-label="상세정보 닫기">×</button>
-              </header>
-
-              <div id="satellite-profile-visual" class="satellite-profile-visual" data-kind="payload" data-orbit="LEO">
-                <svg viewBox="0 0 640 270" role="img" aria-label="위성 대표 형상">
-                  <defs>
-                    <radialGradient id="profile-space-glow" cx="50%" cy="46%" r="64%"><stop offset="0" stop-color="#16304a"/><stop offset=".58" stop-color="#081522"/><stop offset="1" stop-color="#030911"/></radialGradient>
-                    <linearGradient id="profile-earth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1d75a8"/><stop offset=".2" stop-color="#12476f"/><stop offset="1" stop-color="#06111d"/></linearGradient>
-                    <linearGradient id="profile-panel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3e8ed8"/><stop offset=".48" stop-color="#173f75"/><stop offset="1" stop-color="#0d2448"/></linearGradient>
-                    <linearGradient id="profile-metal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#edf6ff"/><stop offset=".42" stop-color="#91a8ba"/><stop offset="1" stop-color="#3b4b5a"/></linearGradient>
-                    <filter id="profile-sat-shadow"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity=".55"/></filter>
-                  </defs>
-                  <rect width="640" height="270" fill="url(#profile-space-glow)"/>
-                  <g class="profile-stars" fill="#cce8ff"><circle cx="42" cy="52" r="1.2"/><circle cx="112" cy="98" r=".8"/><circle cx="184" cy="31" r="1"/><circle cx="257" cy="76" r=".7"/><circle cx="367" cy="39" r="1.1"/><circle cx="446" cy="92" r=".8"/><circle cx="533" cy="43" r="1.2"/><circle cx="599" cy="114" r=".7"/></g>
-                  <ellipse class="profile-orbit-line" cx="320" cy="151" rx="258" ry="73" fill="none" stroke="#ff9f43" stroke-width="1.4" stroke-dasharray="7 8" opacity=".42" transform="rotate(-8 320 151)"/>
-                  <path d="M-35 291 Q320 116 675 291Z" fill="url(#profile-earth)"/>
-                  <path d="M-25 284 Q320 121 665 284" fill="none" stroke="#65c6ff" stroke-width="3" opacity=".55"/>
-
-                  <g class="profile-shape profile-shape-payload" filter="url(#profile-sat-shadow)" transform="translate(320 126)">
-                    <g class="profile-solar-array"><rect x="-188" y="-37" width="128" height="74" rx="2" fill="url(#profile-panel)" stroke="#71b7ff"/><path d="M-156-37V37M-124-37V37M-92-37V37M-188-12H-60M-188 13H-60" stroke="#8cc5f3" stroke-width="1" opacity=".65"/><rect x="60" y="-37" width="128" height="74" rx="2" fill="url(#profile-panel)" stroke="#71b7ff"/><path d="M92-37V37M124-37V37M156-37V37M60-12H188M60 13H188" stroke="#8cc5f3" stroke-width="1" opacity=".65"/><path d="M-60 0H-34M34 0H60" stroke="#b7cbd9" stroke-width="8"/></g>
-                    <path d="M-37-47 30-39 43 34-31 47-47 13Z" fill="url(#profile-metal)" stroke="#e8f4ff" stroke-width="2"/><rect x="-21" y="-29" width="39" height="42" rx="3" fill="#d9a645" stroke="#ffe7a1"/><path d="M18-28 34-17 34 16 18 13Z" fill="#657c8f"/><path d="M-1-47V-69" stroke="#d8e8f2" stroke-width="4"/><circle cx="-1" cy="-73" r="6" fill="#f7fbff"/><path d="M3 42 20 63M-18 44-29 66" stroke="#d8e8f2" stroke-width="4"/>
-                    <g transform="translate(35 -39)"><path d="M0 0Q34-29 56-4Q30 16 0 0Z" fill="#dce9f2" stroke="#fff"/><path d="M4-1 43-3" stroke="#677d8d" stroke-width="3"/><circle cx="1" cy="0" r="5" fill="#ffbd4b"/></g>
-                  </g>
-
-                  <g class="profile-shape profile-shape-station" filter="url(#profile-sat-shadow)" transform="translate(320 127)">
-                    <path d="M-182-55H-71V55H-182ZM71-55H182V55H71Z" fill="url(#profile-panel)" stroke="#72b9ff"/><path d="M-145-55V55M-108-55V55M108-55V55M145-55V55M-182 0H-71M71 0H182" stroke="#8cc5f3" opacity=".65"/>
-                    <path d="M-72 0H72M0-57V58" stroke="#dce9f2" stroke-width="10"/><rect x="-48" y="-24" width="96" height="48" rx="9" fill="url(#profile-metal)"/><circle cx="-53" cy="0" r="17" fill="#cad9e4"/><circle cx="54" cy="0" r="17" fill="#cad9e4"/><rect x="-18" y="-66" width="36" height="132" rx="13" fill="#9cafbd"/><path d="M-25-43H25M-25 43H25" stroke="#f0f6fb" stroke-width="7"/>
-                  </g>
-
-                  <g class="profile-shape profile-shape-rocket" filter="url(#profile-sat-shadow)" transform="translate(320 126) rotate(-16)">
-                    <path d="M-88-27H74L109 0 74 27H-88Z" fill="url(#profile-metal)" stroke="#eff8ff" stroke-width="2"/><ellipse cx="-88" cy="0" rx="17" ry="27" fill="#65798a"/><ellipse cx="77" cy="0" rx="12" ry="24" fill="#d7e3eb"/><path d="M-47-27V27M-7-27V27M33-27V27" stroke="#6f8291"/><path d="M-98-19-125-35M-98 19-125 35" stroke="#d5e6f1" stroke-width="5"/>
-                  </g>
-
-                  <g class="profile-shape profile-shape-debris" filter="url(#profile-sat-shadow)" transform="translate(320 128)" fill="url(#profile-metal)" stroke="#edf7ff">
-                    <path d="M-77-18-35-51-7-24-26 13-68 22Z"/><path d="M17-37 68-24 83 9 39 37 9 8Z"/><path d="M-19 37 7 29 28 62-5 76Z"/><path d="M-104 46-78 31-57 57-88 73Z"/>
-                  </g>
-                </svg>
-                <div class="satellite-profile-visual-copy"><span>대표 형상 · 실제 촬영 이미지 아님</span><b id="profile-visual-class">LEO PAYLOAD</b></div>
-              </div>
-
-              <div class="satellite-live-grid">
-                <span><small>고도</small><b id="profile-altitude">—</b></span>
-                <span><small>속도</small><b id="profile-speed">—</b></span>
-                <span><small>위도</small><b id="profile-latitude">—</b></span>
-                <span><small>경도</small><b id="profile-longitude">—</b></span>
-              </div>
-
-              <div class="satellite-inspector-scroll">
-                <section class="satellite-profile-section">
-                  <div class="satellite-profile-section-head"><h4>식별 / 운영</h4><span id="profile-source">CelesTrak SATCAT</span></div>
-                  <dl class="satellite-profile-grid">
-                    <div><dt>소유국·기관</dt><dd id="profile-owner">조회 중</dd></div>
-                    <div><dt>운용 상태</dt><dd id="profile-ops-status">조회 중</dd></div>
-                    <div><dt>객체 유형</dt><dd id="profile-object-type">—</dd></div>
-                    <div><dt>국제식별자</dt><dd id="profile-object-id">—</dd></div>
-                    <div><dt>발사일</dt><dd id="profile-launch-date">—</dd></div>
-                    <div><dt>발사장 코드</dt><dd id="profile-launch-site">—</dd></div>
-                    <div><dt>레이더 단면적</dt><dd id="profile-rcs">—</dd></div>
-                    <div><dt>분류</dt><dd id="profile-classification">—</dd></div>
-                  </dl>
-                </section>
-
-                <section class="satellite-profile-section">
-                  <div class="satellite-profile-section-head"><h4>궤도 요소</h4><span id="profile-epoch-age">Epoch —</span></div>
-                  <dl class="satellite-profile-grid orbit-values">
-                    <div><dt>궤도 구분</dt><dd id="profile-orbit">—</dd></div>
-                    <div><dt>주기</dt><dd id="profile-period">—</dd></div>
-                    <div><dt>경사각</dt><dd id="profile-inclination">—</dd></div>
-                    <div><dt>이심률</dt><dd id="profile-eccentricity">—</dd></div>
-                    <div><dt>원지점</dt><dd id="profile-apogee">—</dd></div>
-                    <div><dt>근지점</dt><dd id="profile-perigee">—</dd></div>
-                  </dl>
-                </section>
-
-                <p id="profile-data-note" class="satellite-profile-note">궤도는 최신 GP 요소를 SGP4로 전파한 값이며, 대표 형상은 실제 기체 외형과 다를 수 있습니다.</p>
-              </div>
-
-              <footer class="satellite-inspector-actions">
-                <button id="profile-track" type="button">⌖ 카메라 추적</button>
-                <button id="profile-home" type="button">◎ 전체 보기</button>
-                <a id="profile-celestrak-link" href="https://celestrak.org" target="_blank" rel="noopener noreferrer">원본 데이터 ↗</a>
-              </footer>
-            </aside>
-            <div id="globe-selection-status" class="globe-selection-status" hidden><i></i><span>ACTIVE</span><b>—</b></div>
-            <div class="globe-loading" id="globe-loading"><span class="loader"></span><strong>3D 지구 초기화</strong><small>CesiumJS · CelesTrak</small></div>
-            <div class="globe-badge"><span id="visible-satellite-count">0</span> OBJECTS</div>
-          </section>
-          <section class="orbit-metrics metrics-grid">
-            <article class="surface metric-card orbit-summary">
-              <div class="metric-title">궤도 정보</div>
-              <div class="triple-values"><span><b id="orbit-altitude">—</b><small>고도 km</small></span><span><b id="orbit-inclination">—</b><small>경사각 °</small></span><span><b id="orbit-period">—</b><small>주기 min</small></span></div>
-              <div class="mini-orbit"><i></i><i></i><b></b></div>
-            </article>
-            <article class="surface metric-card visibility-card">
-              <div class="metric-title">가시성</div>
-              <div class="ring" id="visibility-ring" style="--value:78"><strong>78%</strong><small>가시</small></div>
-              <div class="legend"><span><i class="green"></i>지상국</span><span><i class="blue"></i>위성</span></div>
-            </article>
-            <article class="surface metric-card link-card">
-              <div class="metric-title">링크 상태</div>
-              <div class="link-lines"><span>Uplink <b id="uplink-value">12.6 Mbps</b></span><canvas id="uplink-spark" width="190" height="40"></canvas><span>Downlink <b id="downlink-value">42.8 Mbps</b></span><canvas id="downlink-spark" width="190" height="40"></canvas></div>
-            </article>
-            <article class="surface metric-card telemetry-card">
-              <div class="metric-title">텔레메트리</div>
-              <div class="telemetry-mini"><span><b id="power-value">86%</b><small>전력</small></span><span><b id="temperature-value">24.3°C</b><small>온도</small></span><span><b id="storage-value">61%</b><small>저장소</small></span></div>
-              <canvas id="telemetry-spark" width="290" height="52"></canvas>
-            </article>
-          </section>
-          <section class="surface timeline-control">
-            <button class="primary-icon" id="runtime-toggle" title="재생/정지">Ⅱ</button>
-            <button class="secondary-icon" id="runtime-reset" title="리셋">■</button>
-            <select class="field compact speed-select" id="runtime-speed" aria-label="시뮬레이션 배속">
-              <option value="0.5">0.5x</option><option value="1" selected>1x</option><option value="2">2x</option><option value="4">4x</option><option value="16">16x</option><option value="64">64x</option>
-            </select>
-            <div class="sim-time"><small>시뮬레이션 시간</small><strong id="simulation-time">T+00:02:04.500</strong></div>
-            <input id="time-slider" class="range" type="range" min="0" max="100" value="18" aria-label="시뮬레이션 타임라인">
-            <button class="button ghost" id="fault-button">장애 주입</button>
-          </section>
+          </div>
+          <div id="satellite-hover-card" class="oc-hover" hidden></div>
+          <div class="globe-loading" id="globe-loading"><span class="loader"></span><strong>궤도 시각화 초기화</strong><small>Cesium / SGP4</small></div>
+          <footer class="oc-scene-foot"><div class="oc-legend"><span><i data-orbit="LEO"></i>LEO</span><span><i data-orbit="MEO"></i>MEO</span><span><i data-orbit="GEO"></i>GEO</span><span><i data-orbit="HEO"></i>HEO</span></div><span id="render-mode">지구 고정 좌표 / 3D</span></footer>
         </section>
 
-        <aside class="orbit-right surface panel node-panel">
-          <div class="panel-head"><h2>노드 상태 <span class="badge info">SIM</span></h2><div class="head-actions"><button class="small-icon">⌕</button><button class="small-icon">▽</button></div></div>
-          <div class="segmented full"><button class="active">전체</button><button>정상</button><button>경고</button><button>이상</button></div>
-          <div id="node-status-list" class="status-list"></div>
-          <section class="selected-entity-card">
-            <div class="eyebrow">선택 위성</div>
-            <h3 id="selected-satellite-name">위성을 선택하세요</h3>
-            <dl id="selected-satellite-detail"><div><dt>NORAD</dt><dd>—</dd></div><div><dt>고도</dt><dd>—</dd></div><div><dt>위도</dt><dd>—</dd></div><div><dt>경도</dt><dd>—</dd></div><div><dt>원지점</dt><dd>—</dd></div><div><dt>근지점</dt><dd>—</dd></div><div><dt>Epoch Age</dt><dd>—</dd></div><div><dt>궤도</dt><dd>—</dd></div></dl>
-            <div class="pass-head"><span>다음 지상국 패스</span><select id="ground-station" aria-label="지상국"><option value="SEOUL">서울</option><option value="JEJU">제주</option><option value="SVALBARD">스발바르</option><option value="ALASKA">알래스카</option><option value="ATACAMA">아타카마</option></select></div>
-            <div id="pass-list" class="pass-list"><span>위성을 선택하세요</span></div>
+        <section class="oc-clock oc-panel" aria-label="분석 시계">
+          <div class="oc-time-label"><span id="orbit-clock-mode">현재 시각</span><time id="orbit-clock">—</time><small>UTC</small></div>
+          <div class="oc-clock-actions"><button id="orbit-back" title="60초 이전 (정지)">−60s</button><button id="orbit-pause" aria-label="분석 시계 일시정지">Ⅱ</button><button id="orbit-forward" title="60초 이후 (정지)">+60s</button><select id="orbit-speed" aria-label="분석 배속"><option value="1">×1</option><option value="10">×10</option><option value="60">×60</option><option value="600">×600</option></select><button id="orbit-now" class="oc-primary">현재</button><button id="orbit-seek-open" title="UTC 시각 직접 입력" aria-label="분석 UTC 입력">UTC 설정</button></div>
+          <form id="orbit-seek-form" hidden><label>분석 UTC <input type="datetime-local" id="orbit-seek-input" step="1" required></label><button type="submit">적용</button><button type="button" id="orbit-seek-cancel">닫기</button></form>
+        </section>
+
+        <section class="oc-observer oc-panel" aria-label="지상 관측 분석">
+          <header class="oc-observer-head"><h2>지상 관측</h2><select id="ground-station" aria-label="관측 기준점"><option value="SEOUL">서울</option><option value="JEJU">제주</option><option value="SVALBARD">스발바르</option><option value="ALASKA">알래스카</option><option value="ATACAMA">아타카마</option></select><label>마스크 <select id="elevation-mask" aria-label="최소 고각"><option value="0">0°</option><option value="5" selected>5°</option><option value="10">10°</option><option value="20">20°</option><option value="30">30°</option></select></label><span id="observer-visibility">위성 미선택</span></header>
+          <div class="oc-observation"><span>방위각 <b id="observer-azimuth">—</b><small>°</small></span><span>고각 <b id="observer-elevation">—</b><small>°</small></span><span>경사거리 <b id="observer-range">—</b><small>km</small></span><span class="oc-station-coords" id="station-coordinates">—</span></div>
+          <div class="oc-pass-heading"><span>관측창 예측 <b>24 h</b></span><span id="pass-reference">—</span><button id="pass-refresh" aria-label="현재 분석 시각부터 관측창 재계산">재계산</button></div>
+          <div id="pass-timeline" class="oc-pass-timeline" aria-label="24시간 관측창 타임라인"></div>
+          <div class="oc-pass-scroll"><table class="oc-pass-table"><thead><tr><th>AOS <small>UTC</small></th><th>LOS <small>UTC</small></th><th>최대 EL</th><th>지속</th><th>경계</th></tr></thead><tbody id="pass-list"><tr><td colspan="5">위성을 선택하세요.</td></tr></tbody></table></div>
+        </section>
+
+        <aside id="orbit-inspector" class="oc-inspector oc-panel" aria-label="선택 위성 분석">
+          <section id="station-card" class="oc-station-card" hidden aria-label="지상국 정보">
+            <header><div class="oc-inspector-kicker"><span id="station-card-kicker">지상국</span><button id="station-card-close" aria-label="지상국 정보 닫기">×</button></div><h2 id="station-card-title">—</h2><span id="station-card-subtitle" class="oc-station-region">—</span></header>
+            <dl id="station-card-facts" class="oc-values"></dl>
+            <h3>실시간 기하 <span id="station-card-state" data-state="none">위성 미선택</span></h3>
+            <dl id="station-card-live" class="oc-values"></dl>
+            <p class="oc-note" id="station-card-note"></p>
+            <div class="oc-station-actions"><button id="station-card-observe" class="oc-primary">관측 기준으로 설정</button><button id="station-card-fly">지도에서 보기</button></div>
           </section>
+          <header class="oc-inspector-head"><div class="oc-inspector-kicker"><span>선택 위성</span><span id="selected-model">GP / SGP4</span></div><h2 id="selected-name">위성을 선택하세요</h2><div class="oc-identity"><span id="selected-id">NORAD —</span><button id="selected-favorite" aria-label="선택 위성 관심 등록" aria-pressed="false" disabled>☆</button></div><span id="selected-cospar">COSPAR —</span></header>
+          <div class="oc-inspector-scroll"><section class="oc-inspector-section oc-shape" id="shape-section"><h3>형상 <span id="shape-state" data-quality="none">미배정</span></h3><figure class="oc-shape-figure"><img id="shape-image" alt="" hidden decoding="async"><figcaption><b id="shape-label">3D 모델 없음</b><small id="shape-note">위성을 선택하면 NASA 3D Resources 모델 배정 여부를 표시합니다.</small><a id="shape-credit" href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener noreferrer">NASA 3D Resources ↗</a></figcaption></figure></section><section class="oc-inspector-section"><h3>전파 상태 <span id="propagation-state">대기</span></h3><p class="oc-note" id="propagation-note">GP 기반 계산이며 실측 텔레메트리가 아닙니다.</p><dl id="position-values" class="oc-values"></dl></section><section class="oc-inspector-section"><h3>평균 궤도요소 <small>GP 기준</small></h3><dl id="element-values" class="oc-values"></dl><p class="oc-note" id="element-note">근지점/원지점과 주기는 평균 운동에서 유도한 근사값입니다.</p></section><section class="oc-inspector-section"><h3>식별 정보 <span id="satcat-state">SATCAT</span></h3><dl id="identity-values" class="oc-values"></dl><p class="oc-note" id="satcat-note"></p></section><section class="oc-inspector-section"><h3>데이터 이력 <small>UTC</small></h3><dl id="source-values" class="oc-values oc-source-values"></dl><p class="oc-note">Epoch 경과는 정확도 보증이나 장비 건전성 지표가 아닙니다.</p><a id="profile-celestrak-link" target="_blank" rel="noopener noreferrer">CelesTrak SATCAT 원문 ↗</a></section></div>
         </aside>
+        <footer class="oc-statusbar"><span id="catalog-source">GP 카탈로그 준비 중</span><span id="orbit-status">실측 텔레메트리 아님</span></footer>
+      </section>
+
+      <!-- NODES -->
+      <section class="tab-view node-sandbox" id="view-nodes" data-view="nodes" aria-label="노드 배치">
+        <section class="ns-scene ns-panel" aria-label="내 위성 궤도 뷰">
+          <header class="ns-scene-toolbar">
+            <div><button data-node-scene="home" title="뷰 초기화: 추적을 풀고 지구 전체 보기">뷰 초기화</button><button data-node-scene="tracks" aria-pressed="true" title="선택 위성 궤적 표시">궤적</button><button data-node-scene="links" aria-pressed="true" title="OISL 링크 표시">OISL 링크</button><button data-node-scene="models" aria-pressed="true" title="모든 위성의 3D 모델 표시">3D 모델</button></div>
+            <div class="ns-clock"><button id="node-lighting" class="map-lighting" aria-pressed="true" title="해 방향 음영 끄기: 지구 전체를 해가 비추는 쪽과 같은 밝기로 봅니다" aria-label="해 방향 음영 끄기: 지구 전체를 해가 비추는 쪽과 같은 밝기로 봅니다">☀</button><span id="node-clock-mode">현재 시각</span><time id="node-clock">—</time><small>UTC</small><button id="node-clock-back" title="60초 이전 (정지)">−60s</button><button id="node-clock-pause" aria-label="분석 시계 일시정지">Ⅱ</button><button id="node-clock-forward" title="60초 이후 (정지)">+60s</button><select id="node-clock-speed" aria-label="분석 배속"><option value="1">×1</option><option value="10">×10</option><option value="60">×60</option><option value="600">×600</option></select><button id="node-clock-now">현재</button></div>
+          </header>
+          <div id="node-cesium" class="globe-container"></div><canvas id="node-globe-fallback" class="globe-fallback" hidden></canvas>
+          <div id="node-space-sun" hidden aria-hidden="true"></div>
+          <div class="map-controls" role="group" aria-label="지도 뷰 제어">
+            <button id="node-map-locate" class="map-focus" data-node-scene="focus" title="뷰 정렬: 선택 항목을 화면 중앙에" aria-label="뷰 정렬" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg>
+            </button>
+            <div class="map-zoom">
+              <button id="node-zoom-in" title="확대" aria-label="지도 확대" disabled>+</button>
+              <input id="node-zoom" class="map-zoom-slider" type="range" min="0" max="100" step="0.1" value="50" aria-label="지도 확대 수준" aria-orientation="vertical" disabled>
+              <button id="node-zoom-out" title="축소" aria-label="지도 축소" disabled>−</button>
+            </div>
+          </div>
+          <div id="node-hover-card" class="ns-hover" hidden></div>
+          <div class="globe-loading" id="node-globe-loading"><span class="loader"></span><strong>배치 뷰 초기화</strong><small>Cesium / Kepler + J2</small></div>
+          <footer class="ns-scene-foot"><span id="node-scene-summary">내 위성 0기</span><span id="node-link-summary">OISL 링크 없음</span><span id="node-render-mode">지구 고정 좌표 / Cesium</span></footer>
+        </section>
+
+        <section class="ns-formation ns-panel" aria-label="편대 배치 도구">
+          <header class="ns-formation-head">
+            <h2>편대 배치</h2>
+            <div class="ns-preset" role="group" aria-label="배치 프리셋"><button data-formation-preset="single" aria-pressed="false">단일</button><button data-formation-preset="train" aria-pressed="false">열차형</button><button data-formation-preset="walker_delta" aria-pressed="true">Walker Δ</button><button data-formation-preset="walker_star" aria-pressed="false">Walker ★</button></div>
+            <label data-tip="생성되는 위성 이름의 접두사입니다. Walker는 접두사-면기호번호(ODT-A1), 열차형은 접두사-번호(ODT-1)로 이름을 붙입니다.">이름 접두사 <input type="text" id="formation-prefix" maxlength="12" value="ODT" autocomplete="off"></label>
+            <label>버스 <select id="formation-bus" aria-label="버스 프리셋" data-tip="위성 버스 프리셋"></select></label>
+            <label>OISL <select id="formation-links" aria-label="OISL 링크 정책" data-tip="OISL 링크 정책"></select></label>
+          </header>
+          <div class="ns-sliders" id="formation-controls"></div>
+          <footer class="ns-formation-foot">
+            <span class="ns-spacer"></span>
+            <label class="ns-live" data-tip="켜져 있으면 편대 생성 후 슬라이더를 움직일 때 같은 편대를 그 자리에서 다시 배치합니다."><input type="checkbox" id="formation-live" checked> 슬라이더 즉시 반영</label>
+            <button id="formation-generate" class="ns-primary" data-tip="이 설정으로 새 편대를 작업 세트에 추가합니다.">편대 생성</button>
+            <button id="formation-remove" disabled>편대 제거</button>
+            <button id="nodes-clear" data-tip="작업 세트의 모든 위성을 지웁니다. 대시보드에 반영된 위성은 회수 전까지 유지됩니다.">전체 비우기</button>
+            <span id="deploy-state">대시보드 미반영</span>
+            <button id="nodes-deploy" class="ns-deploy" data-tip="작업 세트의 사본을 대시보드(궤도 탭) 카탈로그에 반영합니다. 대시보드의 SDC 버튼으로 내 위성만 볼 수 있습니다.">배치 완료 → 대시보드</button>
+            <button id="nodes-recall" data-tip="대시보드에서 내 위성을 모두 제거합니다. 작업 세트는 유지됩니다." disabled>회수</button>
+          </footer>
+        </section>
+
+        <aside class="ns-inspector ns-panel" aria-label="내 위성과 선택 위성">
+          <header class="ns-fleet-head"><h2>내 위성 <span id="node-count" class="ns-count">0</span></h2><button id="node-add">＋ 위성 추가</button></header>
+          <div id="node-fleet" class="ns-fleet" role="listbox" aria-label="내 위성 목록"></div>
+          <div class="ns-detail">
+            <section id="node-status" class="ns-status" aria-live="polite"></section>
+            <form id="node-editor" class="ns-editor" hidden novalidate></form>
+          </div>
+        </aside>
+        <div id="node-tip" class="ns-tip" role="tooltip" hidden></div>
       </section>
 
       <!-- COMMUNICATION -->
-      <section class="tab-view" id="view-communication" data-view="communication">
-        <aside class="surface panel comm-left">
-          <div class="panel-head"><h2>노드 / 링크 목록</h2><button class="small-icon" id="comm-filter-button">▽</button></div>
-          <div class="segmented full"><button class="active" data-comm-list="nodes">노드</button><button data-comm-list="links">링크</button></div>
-          <div class="node-type-summary" id="node-type-summary"></div>
-          <div id="comm-entity-list" class="entity-list scroll-area"></div>
+      <section class="tab-view comm-console" id="view-communication" data-view="communication" aria-label="통신망">
+        <aside class="cm-panel cm-left" aria-label="네트워크 구성">
+          <header class="cm-head"><h2>네트워크 구성</h2><span id="comm-source" class="cm-kicker">배치된 위성 없음</span></header>
+          <div class="cm-segment" role="group" aria-label="목록 종류"><button data-comm-list="satellites" aria-pressed="true">위성</button><button data-comm-list="stations" aria-pressed="false">지상국</button><button data-comm-list="links" aria-pressed="false">링크</button></div>
+          <div class="cm-counts" id="comm-counts"></div>
+          <div class="cm-list-tools" id="comm-station-tools" hidden><select id="comm-station-preset" aria-label="추가할 지상국"></select><button id="comm-station-add">＋ 추가</button></div>
+          <div id="comm-list" class="cm-list" role="listbox" aria-label="네트워크 항목"></div>
+          <form id="comm-station-editor" class="cm-editor" hidden novalidate></form>
+          <p class="cm-note" id="comm-empty-note">노드 탭에서 위성을 배치하고 <b>배치 완료 → 대시보드</b>를 누르면 그 위성만 이 화면의 통신망에 나타납니다.</p>
         </aside>
-        <section class="comm-main stack">
-          <section class="surface network-card">
-            <div class="panel-head overlay-head"><h2>네트워크 토폴로지</h2><div class="head-actions"><div class="segmented"><button class="active" data-network-layout="mesh">Mesh</button><button data-network-layout="geo">Geo</button></div><select class="field compact" id="protocol-filter"><option value="all">OISL / DTN</option><option value="OISL">OISL</option><option value="DTN">DTN</option></select></div></div>
-            <div class="route-planner"><select id="route-source" class="field compact" aria-label="경로 출발지"></select><span>→</span><select id="route-target" class="field compact" aria-label="경로 목적지"></select><select id="route-objective" class="field compact" aria-label="경로 목적"><option value="balanced">균형</option><option value="latency">최저 지연</option><option value="reliability">최대 신뢰도</option></select><button class="button primary tiny" id="route-calculate">경로 계산</button><span class="route-result" id="route-result">경로 미계산</span></div>
-            <svg id="network-svg" viewBox="0 0 1000 640" role="img" aria-label="우주 통신 네트워크 토폴로지"></svg>
-            <div class="network-legend"><span><i class="green"></i>정상</span><span><i class="blue"></i>DTN</span><span><i class="orange"></i>경고</span><span><i class="red"></i>장애</span></div>
+
+        <section class="cm-scene cm-panel" aria-label="통신망 뷰">
+          <header class="cm-scene-toolbar">
+            <div class="cm-view-switch" role="group" aria-label="보기 방식"><button data-comm-view="3d" aria-pressed="true" title="위성과 지상국의 실제 위치, 링크 선, 커버리지">지구 3D</button><button data-comm-view="diagram" aria-pressed="false" title="궤도면별로 정리한 논리 연결과 품질">연결도</button></div>
+            <div><button data-comm-scene="home" title="뷰 초기화: 추적을 풀고 지구 전체 보기">뷰 초기화</button><button data-comm-scene="tracks" aria-pressed="true" title="선택 위성 궤적 표시">궤적</button><button data-comm-scene="links" aria-pressed="true" title="OISL 링크 선 표시">OISL</button><button data-comm-scene="ground" aria-pressed="true" title="지상국-위성 링크 선 표시">지상 링크</button><button data-comm-scene="coverage" aria-pressed="true" title="지상국 커버리지(위성 고도 기준) 표시">커버리지</button><button data-comm-scene="models" aria-pressed="true" title="모든 위성의 3D 모델 표시">3D 모델</button></div>
+            <div class="cm-clock"><button id="comm-lighting" class="map-lighting" aria-pressed="true" title="해 방향 음영 끄기" aria-label="해 방향 음영 끄기">☀</button><span id="comm-clock-mode">현재 시각</span><time id="comm-clock">—</time><small>UTC</small><button id="comm-clock-back" title="60초 이전 (정지)">−60s</button><button id="comm-clock-pause" aria-label="분석 시계 일시정지">Ⅱ</button><button id="comm-clock-forward" title="60초 이후 (정지)">+60s</button><select id="comm-clock-speed" aria-label="분석 배속"><option value="1">×1</option><option value="10">×10</option><option value="60">×60</option><option value="600">×600</option></select><button id="comm-clock-now">현재</button></div>
+          </header>
+          <div class="cm-route-bar"><span>경로</span><select id="comm-route-source" aria-label="경로 출발지"></select><span>→</span><select id="comm-route-target" aria-label="경로 목적지"></select><select id="comm-route-objective" aria-label="경로 목적"><option value="latency">최저 지연</option><option value="reliability">최대 신뢰도</option><option value="balanced" selected>균형</option></select><button id="comm-route-calculate" class="cm-primary">경로 계산</button><button id="comm-route-clear">지우기</button><span id="comm-route-summary" class="cm-route-summary">경로 미계산</span></div>
+          <div id="comm-cesium" class="globe-container"></div><canvas id="comm-globe-fallback" class="globe-fallback" hidden></canvas>
+          <div id="comm-space-sun" hidden aria-hidden="true"></div>
+          <div class="map-controls" role="group" aria-label="지도 뷰 제어">
+            <button id="comm-map-locate" class="map-focus" data-comm-scene="focus" title="뷰 정렬: 선택 항목을 화면 중앙에" aria-label="뷰 정렬" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"/><path d="M12 2v5m0 10v5M2 12h5m10 0h5"/></svg>
+            </button>
+            <div class="map-zoom">
+              <button id="comm-zoom-in" title="확대" aria-label="지도 확대" disabled>+</button>
+              <input id="comm-zoom" class="map-zoom-slider" type="range" min="0" max="100" step="0.1" value="50" aria-label="지도 확대 수준" aria-orientation="vertical" disabled>
+              <button id="comm-zoom-out" title="축소" aria-label="지도 축소" disabled>−</button>
+            </div>
+          </div>
+          <div id="comm-diagram" class="cm-diagram" hidden></div>
+          <div id="comm-hover-card" class="cm-hover" hidden></div>
+          <div class="globe-loading" id="comm-globe-loading"><span class="loader"></span><strong>통신망 뷰 초기화</strong><small>Cesium / Kepler + J2</small></div>
+          <footer class="cm-scene-foot"><div class="cm-legend"><span><i style="background:#3ddc84"></i>OISL 양방향</span><span><i style="background:#ffc357"></i>포착·구동</span><span><i style="background:#4ac4ee"></i>지상 링크</span><span><i style="background:#a78bfa"></i>계산 경로</span><span><i style="background:#ff6b6b"></i>차단·장애</span></div><span id="comm-scene-summary">—</span><span id="comm-render-mode">지구 고정 좌표 / Cesium</span></footer>
+        </section>
+
+        <section class="cm-bottom" aria-label="경로, 접속창, 저장 전달">
+          <article class="cm-panel cm-card"><header class="cm-head"><h3>경로 결과</h3><span id="comm-route-badge" class="cm-kicker">미계산</span></header><div id="comm-route-detail" class="cm-card-body"></div></article>
+          <article class="cm-panel cm-card"><header class="cm-head"><h3>지상국 접속창 <small>3 h</small></h3><div class="cm-head-tools"><select id="comm-pass-station" aria-label="접속창 지상국"></select><button id="comm-pass-refresh" title="현재 분석 시각부터 다시 계산">재계산</button></div></header><div id="comm-pass-list" class="cm-card-body"></div></article>
+          <article class="cm-panel cm-card"><header class="cm-head"><h3>저장 전달 <small>DTN</small></h3><span id="comm-dtn-badge" class="cm-kicker">—</span></header><div id="comm-dtn-list" class="cm-card-body"></div></article>
+        </section>
+
+        <aside class="cm-panel cm-right" aria-label="선택 항목">
+          <header class="cm-head"><h2 id="comm-detail-title">선택 항목</h2><button id="comm-fault-button" title="선택한 위성, 지상국 또는 링크에 SIM 장애를 주입">⚡ 장애 주입</button></header>
+          <div id="comm-fabric-chip" class="cm-fabric"></div>
+          <div id="comm-detail" class="cm-detail"></div>
+        </aside>
+      </section>
+
+      <!-- DATA MANAGEMENT -->
+      <section class="tab-view data-management" id="view-data" data-view="data" aria-label="데이터 관리">
+        <aside class="dm-panel dm-side" aria-label="데이터 관리 모듈과 저장 노드">
+          <header class="dm-head"><h2>데이터 관리 모듈</h2><span class="dm-tag" id="dm-module-badge">연결 확인 중</span></header>
+          <dl class="dm-values" id="dm-module-values"></dl>
+          <header class="dm-head"><h2>저장 노드 <span class="dm-count" id="dm-node-count">0</span></h2><button id="dm-refresh" data-tip="데이터 관리 모듈에 지금 상태를 다시 요청합니다.">새로고침</button></header>
+          <div class="dm-chips" role="group" aria-label="노드 종류"><button data-node-kind="all" aria-pressed="true">SDC 배치 노드</button><button data-node-kind="onboard" aria-pressed="false">탑재 저장소</button></div>
+          <p class="dm-note" id="dm-deployment-note" role="status" style="padding:0 10px">배치 구성 확인 중</p>
+          <div class="dm-nodes" id="dm-nodes" role="listbox" aria-label="저장 노드 목록"></div>
+        </aside>
+
+        <section class="dm-main" aria-label="데이터 안정성과 카탈로그">
+          <section class="dm-panel dm-stability">
+            <div class="dm-score">
+              <div class="dm-ring" id="dm-score-ring" role="img" aria-label="데이터 안정성 점수"><strong id="dm-score">—</strong><small id="dm-grade">안정성</small></div>
+              <div class="dm-components" id="dm-components"></div>
+            </div>
+            <div class="dm-tiles-wrap">
+              <div class="dm-tiles" id="dm-tiles"></div>
+              <div class="dm-alerts" id="dm-alerts"></div>
+            </div>
           </section>
-          <section class="comm-bottom split-panels">
-            <article class="surface panel packet-log-panel"><div class="panel-head"><h2>패킷 / 라우팅 로그</h2><button class="small-icon" id="clear-packet-log">×</button></div><div class="table-wrap"><table><thead><tr><th>시간</th><th>출발지</th><th>목적지</th><th>프로토콜</th><th>상태</th></tr></thead><tbody id="packet-log-body"></tbody></table></div></article>
-            <article class="surface panel queue-panel"><div class="panel-head"><h2>데이터 청크 큐</h2><button class="small-icon">›</button></div><div id="packet-queue" class="queue-grid"></div></article>
-            <article class="surface panel contact-panel"><div class="panel-head"><h2>접속창</h2><span class="badge info">12 h</span></div><div id="contact-window-list" class="contact-window-list"></div></article>
+
+          <section class="dm-panel dm-pipeline">
+            <header class="dm-head"><h2>수집 · 저장 · 분산 · 서비스</h2><span class="dm-note" id="dm-pipeline-note">—</span></header>
+            <div class="dm-stages" id="dm-stages"></div>
+            <div class="dm-trends">
+              <figure><figcaption>수집 처리율 <b id="dm-trend-ingest">—</b> Mbps</figcaption><canvas id="dm-spark-ingest"></canvas></figure>
+              <figure><figcaption>평균 복제 지연 <b id="dm-trend-lag">—</b> s</figcaption><canvas id="dm-spark-lag"></canvas></figure>
+              <figure><figcaption>평균 서비스 지연 <b id="dm-trend-latency">—</b> ms</figcaption><canvas id="dm-spark-latency"></canvas></figure>
+            </div>
+          </section>
+
+          <section class="dm-panel dm-catalog">
+            <header class="dm-head">
+              <h2>데이터 카탈로그 <span class="dm-count" id="dm-catalog-count">0</span></h2>
+              <div class="dm-catalog-tools"><div class="dm-chips" id="dm-class-filter" role="group" aria-label="데이터 종류"></div><input type="search" id="dm-search" placeholder="객체 ID, 이름, 생성 노드 검색" aria-label="데이터 객체 검색" autocomplete="off"></div>
+            </header>
+            <div class="dm-table-wrap">
+              <table class="dm-table"><thead><tr><th>객체</th><th>종류</th><th>생성 노드</th><th>크기</th><th>복제</th><th>정합성</th><th>계층</th><th>상태</th><th>등록</th></tr></thead><tbody id="dm-objects"></tbody></table>
+            </div>
           </section>
         </section>
-        <aside class="surface panel comm-right"><div class="panel-head"><h2>링크 분석</h2><button class="small-icon" id="link-fault-button">⚡</button></div><div class="segmented full comm-analysis-tabs"><button class="active" data-comm-analysis="quality">품질</button><button data-comm-analysis="budget">링크 버짓</button></div><div id="link-quality-cards" class="quality-stack" data-comm-pane="quality"></div><div class="link-budget-pane" data-comm-pane="budget" hidden><div class="budget-input-grid"><label>주파수 GHz<input id="budget-frequency" class="field compact" type="number" value="26" step="0.1"></label><label>거리 km<input id="budget-distance" class="field compact" type="number" value="1200"></label><label>송신 W<input id="budget-power" class="field compact" type="number" value="20"></label><label>대역폭 MHz<input id="budget-bandwidth" class="field compact" type="number" value="20"></label><label>Tx Gain dBi<input id="budget-tx-gain" class="field compact" type="number" value="32"></label><label>Rx Gain dBi<input id="budget-rx-gain" class="field compact" type="number" value="34"></label></div><button class="button primary" id="budget-calculate">계산</button><div id="budget-result" class="budget-result"><span>입력 후 계산</span></div></div><section class="selected-link"><div class="eyebrow">선택 링크</div><h3 id="selected-link-name">링크를 선택하세요</h3><dl id="selected-link-detail"></dl></section></aside>
+
+        <aside class="dm-panel dm-right" aria-label="선택 객체와 운영 조치">
+          <div class="dm-detail" id="dm-detail"></div>
+          <section class="dm-ops">
+            <header class="dm-head" style="padding:0 0 4px;border:0"><h2>운영 조치</h2><button id="dm-snapshot" disabled title="SDC 전용 데이터에는 DT 자체 운용 스냅샷을 등록하지 않습니다." data-tip="SDC 전용 데이터에는 DT 자체 운용 스냅샷을 등록하지 않습니다.">DT 스냅샷 제외</button></header>
+            <div class="dm-ops-buttons"><button data-dm-action="verify">무결성 검사</button><button data-dm-action="heal">자가복구</button><button data-dm-action="rebalance">재균형</button><button data-dm-action="purge_expired">만료 정리</button></div>
+            <div class="dm-policy"><select id="dm-policy-class" aria-label="복제 정책 대상 종류"></select><input type="range" id="dm-policy-rf" min="1" max="5" step="1" value="2" aria-label="복제 계수" data-tip="선택한 데이터 종류의 복제본 수입니다. 올리면 부족한 복제본을 만들고, 내리면 초과분을 정리합니다."><b id="dm-policy-rf-value">2</b><button id="dm-policy-apply">적용</button></div>
+            <p class="dm-note" id="dm-policy-note">—</p>
+            <div class="dm-jobs" id="dm-jobs"></div>
+          </section>
+          <header class="dm-head"><h2>이벤트 <span class="dm-count" id="dm-event-count">0</span></h2><div class="dm-chips" role="group" aria-label="이벤트 등급"><button data-event-severity="all" aria-pressed="true">전체</button><button data-event-severity="warning" aria-pressed="false">경고</button><button data-event-severity="danger" aria-pressed="false">위험</button></div></header>
+          <div class="dm-events" id="dm-events"></div>
+        </aside>
+        <div id="dm-tip" class="dm-tip" role="tooltip" hidden></div>
+      </section>
+
+      <!-- SECURITY: SIM reports from independent operations software, not crypto assurance. -->
+      <section class="tab-view security-console" id="view-security" data-view="security" aria-label="보안 모니터링">
+        <header class="sec-heading sec-panel">
+          <div><span class="sec-kicker">PLANE 5 / GUARD</span><h2>보안 모니터링 <span class="sec-tag">SIM</span></h2><p>별도 보안 운용 SW의 규칙 판정입니다. 실제 보안 검증이 아닙니다.</p></div>
+          <div class="sec-heading-status"><strong id="security-health" role="status">수신 대기</strong><small>마지막 보고 수신 <b id="security-received">—</b></small></div>
+        </header>
+        <div class="sec-metrics">
+          <article class="sec-panel"><small>인증률 <span class="sec-tag">SIM</span></small><strong><b id="security-auth">—</b><em>%</em></strong><span id="security-auth-state">미확인</span></article>
+          <article class="sec-panel"><small>송수신 처리량 <span class="sec-tag">SIM</span></small><strong><b id="security-throughput">—</b><em>Mbps</em></strong><span>전체 모의 지표 / 구간별 측정 아님</span></article>
+          <article class="sec-panel"><small>패킷 손실률 <span class="sec-tag">SIM</span></small><strong><b id="security-loss">—</b><em>%</em></strong><span>링크 품질은 보안 검증과 다릅니다</span></article>
+          <article class="sec-panel"><small>실제 파일 무결성</small><strong class="sec-unverified" id="security-integrity">검증 입력 없음</strong><span>암호학적 검증 미연동</span></article>
+        </div>
+        <div class="sec-layout">
+          <aside class="sec-side">
+            <section class="sec-panel"><h3>보안 운용 SW <span class="sec-tag">ICD-08</span></h3><div class="sec-module-mark" aria-hidden="true">◇</div><strong id="security-placement">—</strong><p id="security-implementation">모듈 보고 수신 대기</p><dl class="sec-details"><div><dt>모듈 상태</dt><dd id="security-module-state">미확인</dd></div><div><dt>계약</dt><dd id="security-version">—</dd></div></dl><p class="sec-endpoint" id="security-endpoint">—</p><p class="sec-note">DT는 관측값을 생성하고, 보안 운용 SW가 정책을 판정합니다.</p></section>
+            <section class="sec-panel"><h3>브라우저 연결</h3><strong id="security-transport">—</strong><dl class="sec-details"><div><dt>텔레메트리</dt><dd id="security-socket">연결 중</dd></div></dl><p id="security-transport-detail">연결 정보 확인 중</p><p class="sec-caution">현재 서버의 사용자 인증은 미구현입니다.</p></section>
+          </aside>
+          <div class="sec-main">
+            <section class="sec-panel sec-flow-panel"><div class="sec-panel-title"><h3>데이터 송수신 관측 지점</h3><span class="sec-tag" id="security-flow-state">흐름 표시 정지</span></div>
+              <svg id="security-flow" viewBox="0 0 740 290" role="img" aria-labelledby="security-flow-title security-flow-desc" data-moving="false">
+                <title id="security-flow-title">위성, 중계, 지상국의 모의 데이터 흐름</title><desc id="security-flow-desc">움직이는 패킷은 개념도이며 실제 패킷 캡처가 아닙니다. 방패는 검증 완료가 아닌 보안 관측 지점을 나타냅니다.</desc>
+                <defs><pattern id="sec-grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="currentColor" stroke-width="0.5"/></pattern></defs>
+                <rect width="740" height="290" fill="url(#sec-grid)" class="sec-grid"/>
+                <ellipse cx="370" cy="136" rx="310" ry="110" class="sec-orbit"/><ellipse cx="370" cy="136" rx="270" ry="77" class="sec-orbit"/>
+                <path d="M143 119H335 M405 119H597 M597 157H405 M335 157H143" class="sec-rail"/>
+                <path d="M143 119H335 M405 119H597" class="sec-packets"/><path d="M597 157H405 M335 157H143" class="sec-packets sec-return"/>
+                <text x="240" y="98" class="sec-direction">송신 →</text><text x="500" y="98" class="sec-direction">송신 →</text><text x="240" y="181" class="sec-direction">← 수신</text><text x="500" y="181" class="sec-direction">← 수신</text>
+                <g transform="translate(110 138)"><circle r="42" class="sec-node"/><g class="sec-symbol" transform="rotate(-25)"><rect x="-11" y="-13" width="22" height="26" rx="2"/><path d="M-32-10H-15V10H-32Z M15-10H32V10H15Z M0-13V-24 M-5-24H5"/></g><text y="71" class="sec-node-label">위성</text><text y="88" class="sec-node-sub">모의 데이터 생성</text></g>
+                <g transform="translate(370 138)"><circle r="42" class="sec-node"/><g class="sec-symbol"><circle r="7"/><path d="M-18-18A26 26 0 0 0-18 18 M18-18A26 26 0 0 1 18 18 M-27-27A38 38 0 0 0-27 27 M27-27A38 38 0 0 1 27 27"/></g><text y="71" class="sec-node-label">중계</text><text y="88" class="sec-node-sub">송수신 관측</text></g>
+                <g transform="translate(630 138)"><circle r="42" class="sec-node"/><g class="sec-symbol"><path d="M-21-18A25 25 0 0 0 21 18Z M0 3L10-21 M5-24L14-18 M-4 15L-12 29 M3 19L12 29 M-18 29H18"/></g><text y="71" class="sec-node-label">지상국</text><text y="88" class="sec-node-sub">데이터 수신</text></g>
+                <g class="sec-shield" transform="translate(240 136)"><path d="M0-14L12-9V1Q12 11 0 17Q-12 11-12 1V-9Z"/><text y="6">?</text></g><g class="sec-shield" transform="translate(500 136)"><path d="M0-14L12-9V1Q12 11 0 17Q-12 11-12 1V-9Z"/><text y="6">?</text></g>
+                <text x="370" y="266" class="sec-node-sub">방패: 보안 관측 지점 / 암호 검증 입력 없음</text>
+              </svg>
+              <div class="sec-flow-foot"><span id="security-threshold">모듈 판정 수신 대기</span><span>패킷 이동은 SIM 개념도입니다</span></div>
+              <p id="security-evidence" class="sec-note">모듈 보고 수신 대기</p>
+            </section>
+            <section class="sec-panel sec-events-panel"><div class="sec-panel-title"><h3>모듈 관측 이력</h3><span class="sec-tag">최근 40건</span></div><p class="sec-note">화면 조회 시 관측합니다. 연속 감사 서비스나 공격 탐지 로그가 아닙니다.</p><div class="sec-events-scroll"><table><thead><tr><th>관측 UTC</th><th>출처</th><th>판정 전환</th></tr></thead><tbody id="security-events"><tr><td colspan="3">관측 이력 없음</td></tr></tbody></table></div></section>
+          </div>
+          <aside class="sec-side">
+            <section class="sec-panel sec-technologies"><h3>보안 기술 연동</h3><article><div><b>CCSDS SDLS</b><span class="sec-tag">미연동</span></div><p>데이터링크 보안 검증 입력 없음</p></article><article><div><b>PQC</b><span class="sec-tag">미연동</span></div><p>양자 내성 암호 연산 미구현</p></article><article><div><b>TEE / Mesh-PUF</b><span class="sec-tag">미연동</span></div><p>Root-of-Trust 증거 없음</p></article><article><div><b>OTAR / 제로트러스트</b><span class="sec-tag">미연동</span></div><p>키 배포와 신뢰 정책 연계 없음</p></article><p class="sec-caution">PQC-TEE: <b id="security-mock-device">MOCK 상태 미제공</b><br>모델 연결 상태이며 실제 장비 검증이 아닙니다.</p></section>
+            <section class="sec-panel"><h3>관측 기준</h3><dl class="sec-details"><div><dt>출처</dt><dd>결정론적 SIM</dd></div><div><dt>SIM 시각</dt><dd id="security-sim-time">—</dd></div><div><dt>관측 UTC</dt><dd id="security-observed">—</dd></div></dl><p id="security-run" class="sec-endpoint">—</p><p class="sec-note">모듈 이력은 메모리에 보관됩니다. 새 실행과 모듈 재시작 시 초기화됩니다.</p></section>
+          </aside>
+        </div>
       </section>
 
       <!-- MISSION -->
-      <section class="tab-view" id="view-mission" data-view="mission">
-        <aside class="mission-left stack">
-          <section class="surface panel"><div class="panel-head"><h2>임무 목록</h2><button class="small-icon" id="mission-search">⌕</button></div><div id="mission-list" class="mission-list"></div></section>
-          <section class="surface panel constraint-panel"><div class="panel-head"><h2>임무 제약 조건</h2></div><dl><div><dt>전력 가용 범위</dt><dd>200 ~ 1,200 W</dd></div><div><dt>링크 가용률</dt><dd>≥ 92%</dd></div><div><dt>연산 부하 한계</dt><dd>≤ 85%</dd></div><div><dt>저장소 여유</dt><dd>≥ 20%</dd></div><div><dt>열 제한</dt><dd>-10 ~ 40°C</dd></div></dl></section>
+      <section class="tab-view mission-console" id="view-mission" data-view="mission" aria-label="임무 계획">
+        <aside class="msn-panel msn-left" aria-label="임무 목록">
+          <header class="msn-head"><div><h2>임무 목록</h2><span id="msn-source" class="msn-kicker">배치된 위성 없음</span></div><button id="msn-new" class="msn-primary">＋ 새 임무</button></header>
+          <div class="msn-counts" id="msn-counts"></div>
+          <div class="msn-filter" role="group" aria-label="임무 구분"><button data-msn-filter="all" aria-pressed="true">전체</button><button data-msn-filter="active" aria-pressed="false">진행</button><button data-msn-filter="done" aria-pressed="false">종료</button></div>
+          <div id="msn-list" class="msn-list" role="listbox" aria-label="임무"></div>
+          <div id="msn-module-chip" class="msn-module"></div>
         </aside>
-        <section class="mission-main stack">
-          <section class="surface panel mission-plan-panel">
-            <div class="mission-plan-toolbar"><div class="date-picker"><button class="small-icon">‹</button><strong id="mission-date">2026-07-10 (UTC)</strong><button class="small-icon">›</button><span class="badge info" id="plan-version">PLAN v—</span></div><div class="head-actions"><button class="button ghost" id="mission-add-task">＋ 작업</button><button class="button ghost" id="mission-validate">충돌 검사</button><button class="button primary" id="mission-replan">✣ 재계획</button></div></div>
-            <div class="mission-phase-strip"><span>접근</span><span>관측</span><span>다운링크</span><span>검증</span><span>종료</span></div>
-            <div id="mission-timeline" class="mission-timeline"></div>
-            <section class="resource-row" id="mission-resources"></section>
+
+        <section class="msn-panel msn-schedule" aria-label="위성 일정표">
+          <header class="msn-toolbar">
+            <div><h2>위성 일정표</h2><select id="msn-hours" aria-label="표시 범위"><option value="6">6 h</option><option value="12" selected>12 h</option><option value="24">24 h</option></select><button data-msn-rows="busy" aria-pressed="true" title="작업이 배정된 위성만">작업 있는 위성</button><button data-msn-rows="all" aria-pressed="false" title="배치된 모든 위성">전체 위성</button><button id="msn-windows" title="현재 분석 시각부터 지상국 접속창과 식 구간을 다시 계산">접속창 계산</button></div>
+            <div class="msn-clock"><span id="msn-clock-mode">현재 시각</span><time id="msn-clock">—</time><small>UTC</small><button id="msn-clock-back" title="10분 이전 (정지)">−10m</button><button id="msn-clock-pause" aria-label="분석 시계 일시정지">Ⅱ</button><button id="msn-clock-forward" title="10분 이후 (정지)">+10m</button><select id="msn-clock-speed" aria-label="분석 배속"><option value="1">×1</option><option value="10">×10</option><option value="60">×60</option><option value="600">×600</option></select><button id="msn-clock-now">현재</button></div>
+          </header>
+          <div id="msn-planning" class="msn-planning" hidden></div>
+          <div id="msn-timeline" class="msn-timeline"></div>
+          <footer class="msn-schedule-foot"><div class="msn-legend"><span><i style="background:#3ddc84"></i>촬영</span><span><i style="background:#79b3e3"></i>처리</span><span><i style="background:#6b7d94"></i>보관</span><span><i style="background:#a78bfa"></i>위성 간</span><span><i style="background:#4ac4ee"></i>지상 전송</span><span><i style="background:#f4b860"></i>상향</span><span><i style="background:#f28b82"></i>갱신</span><span><i style="background:#ffc357"></i>외부 수신</span><span><i style="background:rgba(74,196,238,.35);border:1px solid #4ac4ee"></i>접속창</span><span><i style="background:rgba(61,220,132,.4);border:1px solid #3ddc84"></i>관측 통과</span><span><i style="background:rgba(120,120,120,.35)"></i>식</span></div><span id="msn-timeline-foot">—</span></footer>
+        </section>
+
+        <section class="msn-bottom" aria-label="검토, 작업, 기록">
+          <article class="msn-panel msn-card"><header class="msn-head"><h3>검토 결과 <small>군집 운용 모듈</small></h3></header><div id="msn-checks" class="msn-card-body"></div></article>
+          <article class="msn-panel msn-card"><header class="msn-head"><h3>작업 목록 <small>선택 임무</small></h3></header><div id="msn-tasks" class="msn-card-body"></div></article>
+          <article class="msn-panel msn-card"><header class="msn-head"><h3>결정 기록</h3></header><div id="msn-log" class="msn-card-body"></div></article>
+        </section>
+
+        <aside class="msn-panel msn-right" aria-label="선택 임무">
+          <header class="msn-head"><h2 id="msn-detail-title">선택 임무</h2></header>
+          <div id="msn-detail" class="msn-detail"></div>
+        </aside>
+      </section>
+
+      <!-- STATUS -->
+      <section class="tab-view" id="view-status" data-view="status" aria-label="상태">
+        <section class="status-main">
+          <section class="surface panel"><div class="panel-head"><h2>시뮬레이션 런타임</h2><span class="badge neutral" id="status-run-mode">SIM</span></div><div id="status-runtime-cards" class="stat-cards"></div></section>
+          <section class="surface panel status-events-panel"><div class="panel-head"><h2>이벤트 이력</h2><span class="badge neutral">현재 실행 · 메모리</span></div><div class="table-wrap"><table><thead><tr><th>시간 UTC</th><th>수준</th><th>유형</th><th>내용</th></tr></thead><tbody id="status-events"></tbody></table></div></section>
+        </section>
+        <aside class="status-side">
+          <section class="surface panel"><div class="panel-head"><h2>현재 텔레메트리</h2><span class="badge neutral">SIM</span></div><dl id="status-telemetry" class="detail-list"></dl></section>
+          <section class="surface panel status-faults-panel"><div class="panel-head"><h2>활성 장애</h2></div><div id="status-faults" class="entity-list"></div></section>
+          <section class="surface panel status-sources-panel"><div class="panel-head"><h2>데이터 출처</h2></div><div id="status-sources" class="entity-list"></div></section>
+        </aside>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="tab-view" id="view-settings" data-view="settings" aria-label="설정">
+        <section class="settings-main">
+          <section class="surface panel settings-topology-panel">
+            <div class="panel-head settings-topology-head">
+              <div class="settings-head-left"><h2>모듈 연결 토폴로지</h2><span class="badge neutral" title="모든 모듈이 이 프로세스 안에 내장된 구성입니다. 링크 상태는 운용 모드와 연결 설정, 운용 콘솔의 실제 WebSocket 상태로 계산합니다.">내장 구성</span></div>
+              <div class="segmented settings-mode" role="group" aria-label="운용 모드" id="settings-mode-bar"></div>
+              <div class="settings-summary" id="settings-summary"></div>
+            </div>
+            <p class="settings-mode-note" id="settings-mode-note"></p>
+            <div class="topo" id="settings-topology"></div>
+            <div class="topo-legend"><span class="active">연결</span><span class="down">단절</span><span class="standby">대기</span><span class="disabled">사용 안 함</span><span class="unknown">미확인</span><span class="rtt" id="settings-rtt">콘솔 왕복 —</span></div>
           </section>
-          <section class="surface panel decision-log-panel"><div class="panel-head"><h2>의사결정 로그</h2><div class="head-actions"><button class="button tiny" data-log-filter="all">전체</button><button class="button tiny ghost" data-log-filter="auto">자동</button><button class="small-icon" id="export-decision-log">⇩</button></div></div><div class="table-wrap"><table><thead><tr><th>시간</th><th>구분</th><th>대상</th><th>의사결정</th><th>상태</th></tr></thead><tbody id="decision-log-body"></tbody></table></div></section>
+          <section class="surface panel settings-links-panel">
+            <div class="panel-head"><h2>링크 상태표</h2><span class="badge info" id="settings-links-count">0</span></div>
+            <div class="table-wrap"><table><thead><tr><th>링크</th><th>구간</th><th>전송 · 엔드포인트</th><th>ICD</th><th>상태</th><th>비고</th></tr></thead><tbody id="settings-link-rows"></tbody></table></div>
+          </section>
         </section>
-        <aside class="mission-right stack">
-          <section class="surface panel"><div class="panel-head"><h2>성공 조건</h2></div><div id="success-condition-list" class="check-list"></div></section>
-          <section class="surface panel"><div class="panel-head"><h2>위험 요소</h2><span class="badge warning">3</span></div><div class="risk-list"><article><span class="badge warning">중간</span><div><b>태양 활동 증가</b><small>SAA 구간 통과 예정</small></div></article><article><span class="badge warning">중간</span><div><b>링크 간섭 가능성</b><small>10:20 ~ 11:00 UTC</small></div></article><article><span class="badge info">낮음</span><div><b>저장소 사용률 증가</b><small>예상 최대 75%</small></div></article></div></section>
-          <section class="surface panel mission-summary"><div class="panel-head"><h2>임무 요약</h2></div><div class="ring large" id="mission-ring" style="--value:72"><strong>72%</strong><small>진행률</small></div><div class="mission-actions"><button class="button primary" id="mission-start">실행</button><button class="button ghost danger" id="mission-abort">중단</button></div></section>
+        <aside class="settings-side">
+          <section class="surface panel settings-detail-panel"><div class="panel-head"><h2>선택 항목</h2><button class="small-icon" id="settings-detail-clear" title="선택 해제" aria-label="선택 해제">×</button></div><div id="settings-detail"></div></section>
+          <section class="surface panel settings-icd-panel"><div class="panel-head"><h2>ICD 관리</h2><span class="badge info" id="settings-icd-count">0</span></div><div class="table-wrap"><table><thead><tr><th>ICD</th><th>명칭</th><th>구간</th><th>버전</th><th>상태</th><th>링크</th></tr></thead><tbody id="settings-icd-rows"></tbody></table></div></section>
         </aside>
       </section>
 
-      <!-- ANALYSIS -->
-      <section class="tab-view" id="view-analysis" data-view="analysis">
-        <aside class="surface panel analysis-left"><div class="panel-head"><h2>요구사항</h2><button class="small-icon">▽</button></div><div id="requirement-list" class="requirement-list"></div><div class="analysis-filters"><label><input type="checkbox" data-result-filter="PASS" checked> PASS</label><label><input type="checkbox" data-result-filter="FAIL" checked> FAIL</label><label><input type="checkbox" data-result-filter="INVALID" checked> INVALID</label></div></aside>
-        <section class="analysis-main stack">
-          <section class="surface panel kpi-panel"><div class="panel-head"><h2>KPI / 검증 결과</h2><div class="head-actions"><span class="badge info" id="analysis-provenance">SIM · 산출 중</span><button class="button ghost" id="replay-button">▶ History</button><a class="button primary" href="/api/reports/summary.csv">CSV</a><a class="button ghost" href="/api/reports/snapshot.json">JSON</a></div></div><div id="kpi-grid" class="kpi-grid"></div><div class="chart-box"><div class="chart-head"><strong>기록 텔레메트리 · Delay</strong><div class="legend"><span><i class="blue"></i>Actual</span><span><i class="green"></i>Target</span><span><i class="orange"></i>Fail Limit</span></div></div><canvas id="analysis-chart" width="1200" height="300"></canvas><div class="replay-slider"><span id="replay-time">T+00:00</span><input id="replay-range" type="range" min="0" max="0" value="0"></div></div></section>
-          <section class="surface panel trace-panel"><div class="panel-head"><h2>Traceability Matrix</h2><span id="trace-summary" class="badge success">5 / 5 PASS</span></div><div class="table-wrap"><table><thead><tr><th>요구사항</th><th>명칭</th><th>시험</th><th>결과</th><th>증적</th></tr></thead><tbody id="trace-body"></tbody></table></div></section>
-        </section>
-        <aside class="analysis-right stack"><section class="surface panel verdict-panel"><div class="eyebrow">종합 판정</div><strong id="overall-score">—</strong><span class="verdict" id="overall-verdict">PENDING</span><div class="score-bar"><i style="width:0"></i></div><small id="verdict-run-id">RUN-—</small></section><section class="surface panel"><div class="panel-head"><h2>이벤트 상관</h2></div><div id="analysis-event-list" class="event-timeline"></div></section><section class="surface panel cause-panel"><div class="panel-head"><h2>KPI 근거</h2></div><div id="kpi-detail" class="kpi-detail">KPI 카드를 선택하세요.</div></section></aside>
-      </section>
-
-      <!-- HIL -->
-      <section class="tab-view" id="view-hil" data-view="hil">
-        <aside class="surface panel hil-left"><div class="panel-head"><h2>시험 장비</h2><button class="small-icon" id="device-refresh">↻</button></div><div id="device-list" class="device-list"></div></aside>
-        <section class="hil-main stack">
-          <section class="surface panel gateway-panel"><div class="panel-head"><h2>EM-HIL Gateway</h2><div class="head-actions"><span class="source-chip" id="hil-readiness"><span class="status-dot warning"></span>Preflight 필요</span><button class="button ghost" id="hil-preflight">Preflight</button><button class="button primary" id="run-sequence">시험 시퀀스</button><button class="button ghost" id="sync-all">전체 동기화</button></div></div><svg id="hil-svg" viewBox="0 0 1000 590" role="img" aria-label="EM-HIL 통합 연결도"></svg></section>
-          <section class="surface panel hil-log-panel"><div class="panel-head"><h2>시험 기록 / 로그</h2><div class="head-actions"><span class="sequence-progress" id="sequence-progress"><i></i><b>대기</b></span><button class="button tiny danger" id="recording-toggle">● REC</button><button class="button tiny ghost" id="loopback-all">Loopback</button><button class="small-icon" id="clear-hil-log">×</button></div></div><div id="hil-log" class="terminal-log"></div></section>
-        </section>
-        <aside class="hil-right stack"><section class="surface panel"><div class="panel-head"><h2>시간 동기화</h2><span class="badge warning" id="clock-state">UNKNOWN</span></div><div class="sync-grid"><article><small>Max Offset</small><strong id="clock-offset">— µs</strong></article><article><small>Max Jitter</small><strong id="clock-jitter">— µs</strong></article><article><small>Latency</small><strong id="hil-latency">— ms</strong></article><article><small>Clock Source</small><strong>SIM/PTP</strong></article></div></section><section class="surface panel"><div class="panel-head"><h2>Data I/O</h2><span class="badge info">MOCK CHANNELS</span></div><div class="io-stats"><span><b id="io-ingest">—</b><small>Ingest</small></span><span><b id="io-command">—</b><small>Command</small></span><span><b id="io-error">—</b><small>Error</small></span><span><b id="io-channels">—</b><small>Channels</small></span></div><canvas id="io-chart" width="360" height="160"></canvas></section><section class="surface panel security-panel"><div class="panel-head"><h2>Preflight Checks</h2></div><div id="preflight-checks" class="security-badges"><span>검사 전</span></div></section></aside>
-      </section>
     </main>
   </div>
 
@@ -325,19 +429,62 @@
     </form>
   </dialog>
 
-  <dialog id="task-dialog" class="modal">
-    <form method="dialog" id="task-form">
-      <div class="modal-head"><div><small>MISSION PLAN</small><h2 id="task-dialog-title">작업 편집</h2></div><button class="icon-button" value="cancel" aria-label="닫기">×</button></div>
-      <input type="hidden" name="task_id" id="task-id">
-      <label>작업명<input class="field" name="name" id="task-name" required></label>
-      <div class="form-grid"><label>Lane<select class="field" name="lane" id="task-lane"><option>관측</option><option>처리</option><option>저장</option><option>전송</option><option>검증</option></select></label><label>상태<select class="field" name="status" id="task-status"><option value="planned">계획</option><option value="running">실행</option><option value="done">완료</option><option value="blocked">차단</option></select></label></div>
-      <div class="form-grid"><label>시작 위치<input class="field" type="number" name="start" id="task-start" min="0" max="100" step="0.5"></label><label>기간<input class="field" type="number" name="duration" id="task-duration" min="1" max="100" step="0.5"></label></div>
-      <div class="form-grid"><label>선행 작업<input class="field" name="predecessor" id="task-predecessor" placeholder="T-01"></label><label>우선순위<input class="field" type="number" name="priority" id="task-priority" min="1" max="10" value="5"></label></div>
-      <div class="modal-actions"><button class="button ghost danger" type="button" id="task-delete">삭제</button><span style="flex:1"></span><button class="button ghost" value="cancel">취소</button><button class="button primary" id="task-save" value="default">저장</button></div>
+  <dialog id="scenario-dialog" class="modal wide scenario-dialog">
+    <form method="dialog" id="scenario-form">
+      <div class="modal-head"><div><small>SCENARIO</small><h2>PoC 시나리오</h2></div><button class="icon-button" value="cancel" aria-label="닫기">×</button></div>
+      <div class="scenario-dialog-body"><aside id="scenario-list" class="scenario-list" role="listbox" aria-label="시나리오 목록"></aside><section id="scenario-detail" class="scenario-detail" aria-live="polite"></section></div>
+      <div class="modal-actions" id="scenario-dialog-actions"></div>
     </form>
   </dialog>
 
+  <dialog id="scenario-result-dialog" class="modal wide">
+    <form method="dialog">
+      <div class="modal-head"><div><small>ICD-06 · VF-03</small><h2>복구 판정 결과</h2></div><button class="icon-button" value="cancel" aria-label="닫기">×</button></div>
+      <div id="scenario-result-body"></div>
+      <div class="modal-actions"><button type="button" class="button ghost" data-result-download>결과 기록 저장 (JSON)</button><button class="button primary" value="cancel">닫기</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="icd-dialog" class="modal wide">
+    <form method="dialog" id="icd-form">
+      <div class="modal-head"><div><small id="icd-dialog-kicker">ICD</small><h2 id="icd-dialog-title">—</h2></div><button class="icon-button" value="cancel" aria-label="닫기">×</button></div>
+      <div id="icd-dialog-body"></div>
+      <div class="modal-actions"><button class="button primary" value="cancel">닫기</button></div>
+    </form>
+  </dialog>
+
+  <div id="app-loading" class="app-loading" data-state="loading" role="progressbar" aria-live="polite" aria-label="초기화 진행" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+    <div class="loading-backdrop" aria-hidden="true"></div>
+    <div class="loading-card">
+      <div class="loading-orbit" aria-hidden="true"><i></i><i></i><b></b></div>
+      <small class="loading-kicker">SpaceTwin VVP · Initializing</small>
+      <h1>Space Data Center Operational Digital Twin</h1>
+      <div class="loading-percent" id="app-loading-percent">0%</div>
+      <div class="loading-bar"><i id="app-loading-bar"></i></div>
+      <div class="loading-step" id="app-loading-step">초기화 준비</div>
+      <ol class="loading-phases" id="app-loading-phases" aria-hidden="true"></ol>
+      <button type="button" class="button ghost loading-retry" id="app-loading-retry">다시 시도</button>
+    </div>
+  </div>
+  <section id="scenario-dock" class="scenario-dock" hidden aria-label="시나리오 재생">
+    <header class="sd-head">
+      <h2 id="sd-name">시나리오</h2><span class="badge neutral" id="sd-phase" data-phase="idle">선택 안 함</span>
+      <span class="sd-clock"><b id="sd-elapsed">T+00:00</b><small id="sd-utc">— UTC</small></span>
+      <div class="sd-transport">
+        <button type="button" id="sd-play" aria-label="재생" disabled>▶</button>
+        <select id="sd-speed" aria-label="재생 배속" disabled></select>
+        <button type="button" id="sd-skip" title="다음 단계 시각으로 시계를 전진합니다" disabled>다음 단계 ⏭</button>
+        <button type="button" id="sd-follow" aria-pressed="true" title="단계가 시작되면 해당 탭으로 자동 이동합니다">자동 이동</button>
+        <button type="button" id="sd-result" disabled>판정 결과</button>
+        <button type="button" id="sd-open" title="시나리오 선택·세팅">시나리오</button>
+        <button type="button" id="sd-collapse" title="접기/펼치기">▾</button>
+        <button type="button" id="sd-close" title="시나리오 재생 종료">×</button>
+      </div>
+    </header>
+    <div class="sd-main"><ol class="sd-steps" id="sd-steps"></ol><div class="sd-body" id="sd-body"></div></div>
+  </section>
+  <aside id="scenario-guide" class="scenario-guide" hidden role="dialog" aria-label="시나리오 안내"></aside>
   <div id="toast-region" class="toast-region" aria-live="polite"></div>
-  <script type="module" src="/static/scripts/app.js?v=20260907-1"></script>
+  <script type="module" src="/static/scripts/app.js?v=20260908-scenario3"></script>
 </body>
 </html>

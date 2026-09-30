@@ -1,0 +1,36 @@
+/* Shared controls for the dashboard, node sandbox and communication globe. */
+:is(#view-orbit, #view-nodes, #view-communication) .map-controls {
+  --map-control-bg: #142331;
+  --map-control-hover: #203b52;
+  --map-control-text: #becfdd;
+  --map-control-border: #334f65;
+  --map-control-accent: #79b7e7;
+  --map-control-track: #324a60;
+  position: absolute; right: 12px; bottom: 37px; z-index: 6;
+  display: flex; flex-direction: column; gap: 8px; width: 34px;
+  height: min(230px, calc(100% - 84px));
+}
+:root[data-theme="light"] :is(#view-orbit, #view-nodes, #view-communication) .map-controls {
+  --map-control-bg: #e4edf5; --map-control-hover: #cddfee;
+  --map-control-text: #294a65; --map-control-border: #a7bccf;
+  --map-control-accent: #326e9e; --map-control-track: #afc5d7;
+}
+#view-communication .map-controls { height: min(230px, calc(100% - 118px)); }
+:is(#view-orbit, #view-nodes, #view-communication) .map-controls button {
+  width: 34px; height: 30px; flex: 0 0 30px; padding: 0;
+  border: 0; border-radius: 3px; background: var(--map-control-bg);
+  color: var(--map-control-text); font-size: 23px; line-height: 1;
+}
+:is(#view-orbit, #view-nodes, #view-communication) .map-controls button:hover:not(:disabled) { background: var(--map-control-hover); color: var(--map-control-accent); }
+:is(#view-orbit, #view-nodes, #view-communication) .map-controls button:disabled { opacity: 1; color: color-mix(in srgb, var(--map-control-text) 35%, var(--map-control-bg)); cursor: default; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-controls .map-focus { display: grid; place-items: center; flex-basis: 34px; height: 34px; border: 1px solid var(--map-control-border); box-shadow: 0 2px 7px #0004; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-focus svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-zoom { display: flex; flex-direction: column; align-items: center; flex: 1; min-height: 0; border: 1px solid var(--map-control-border); border-radius: 3px; background: var(--map-control-bg); box-shadow: 0 2px 7px #0004; padding-block: 2px; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-zoom button { width: 32px; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-controls .map-zoom-slider { appearance: none; writing-mode: vertical-lr; direction: rtl; width: 24px; height: auto; flex: 1; min-height: 0; padding: 0; margin: 4px 0; border: 0; border-radius: 0; cursor: ns-resize; background: transparent; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-zoom-slider::-webkit-slider-runnable-track { width: 3px; background: var(--map-control-track); border-radius: 2px; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-zoom-slider::-webkit-slider-thumb { appearance: none; width: 18px; height: 7px; margin-left: -7.5px; background: var(--map-control-accent); border: 1px solid var(--map-control-border); border-radius: 2px; box-shadow: 0 1px 3px #0004; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-zoom-slider::-moz-range-track { width: 3px; background: var(--map-control-track); border-radius: 2px; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-zoom-slider::-moz-range-thumb { width: 18px; height: 7px; background: var(--map-control-accent); border: 1px solid var(--map-control-border); border-radius: 2px; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-zoom-slider:disabled { opacity: .4; cursor: default; }
+:is(#view-orbit, #view-nodes, #view-communication) .map-lighting { min-width: 26px; padding: 0 5px; font-size: 13px; line-height: 1; }

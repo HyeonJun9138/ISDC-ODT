@@ -1,0 +1,154 @@
+/* Shared pieces for the node, status and settings tabs. */
+.stat-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; }
+.stat-card { display: grid; gap: 4px; padding: 10px 11px; border: 1px solid var(--line); border-radius: var(--radius-sm, 10px); background: var(--panel-inset); min-width: 0; }
+.stat-card small { font-size: 9px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-card strong { font-size: 16px; color: var(--navy); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stat-card.success strong { color: var(--green); }
+.stat-card.warning strong { color: var(--orange); }
+.stat-card.danger strong { color: var(--red); }
+.detail-list { margin: 0; display: grid; gap: 2px; }
+.detail-list > div { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 11px; }
+.detail-list dt { color: var(--muted); }
+.detail-list dd { margin: 0; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.list-item.static { cursor: default; }
+.tab-empty, .empty-state { padding: 12px; color: var(--muted); font-size: 11px; text-align: center; }
+html[data-theme="dark"] .stat-card strong { color: var(--text); }
+
+/* Nodes: the node sandbox has its own layout in nodes.css. */
+
+/* Status */
+#view-status { grid-template-columns: minmax(520px, 1.4fr) minmax(360px, 1fr); }
+#view-status .status-main, #view-status .status-side { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+#view-status .status-events-panel { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+#view-status .status-events-panel .table-wrap { flex: 1; min-height: 0; overflow: auto; }
+#view-status .status-events-panel td:last-child { overflow-wrap: anywhere; }
+#view-status .status-faults-panel .entity-list, #view-status .status-sources-panel .entity-list { display: flex; flex-direction: column; gap: 7px; }
+
+/* Settings: module connection topology, link settings and the ICD register. */
+:root { --topo-core: var(--blue); --topo-ops: var(--cyan); --topo-em: var(--orange); --topo-verify: #8b6cf6; --topo-flow: #ffffff; }
+html[data-theme="dark"] { --topo-verify: #b39dff; --topo-flow: #dff0ff; }
+#view-settings { grid-template-columns: minmax(0, 1fr) 340px; grid-auto-rows: max-content; overflow: auto; align-items: start; align-content: start; }
+#view-settings .settings-main, #view-settings .settings-side { display: flex; flex-direction: column; gap: 12px; min-height: 0; min-width: 0; }
+#view-settings .settings-topology-panel { flex: 0 0 auto; min-width: 0; display: flex; flex-direction: column; }
+#view-settings .settings-topology-head { flex-wrap: wrap; row-gap: 8px; margin-bottom: 6px; }
+#view-settings .settings-head-left { display: flex; align-items: center; gap: 8px; }
+#view-settings .settings-mode button { padding: 0 14px; white-space: nowrap; }
+#view-settings .settings-mode-note { margin: 0 0 6px; font-size: 11px; color: var(--muted); }
+#view-settings .settings-summary { display: flex; flex-wrap: wrap; gap: 6px; }
+.summary-chip { display: inline-flex; align-items: center; gap: 5px; min-height: 24px; padding: 0 9px; border: 1px solid var(--line); border-radius: 999px; background: var(--panel-inset); font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.summary-chip b { color: var(--text); font-variant-numeric: tabular-nums; }
+.summary-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--line-strong); }
+.summary-chip.active i { background: var(--green); } .summary-chip.down i { background: var(--red); } .summary-chip.disabled i { background: var(--orange); }
+.summary-chip.zero { opacity: .55; }
+.topo { flex: 0 0 auto; min-width: 0; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--panel-inset); overflow: auto; }
+/* Fit the whole diagram without magnifying it on ultrawide displays. */
+.topo svg { display: block; width: 100%; min-width: 0; height: auto; max-height: min(720px, 64dvh); font-family: inherit; }
+.topo-zone rect { fill: var(--surface); fill-opacity: .55; stroke: var(--line); stroke-dasharray: 5 4; }
+.topo-zone text { fill: var(--muted); font-size: 10.5px; font-weight: 800; letter-spacing: .08em; }
+.topo-zone.core rect { stroke: color-mix(in srgb, var(--topo-core) 45%, var(--line)); }
+.topo-zone.ops rect { stroke: color-mix(in srgb, var(--topo-ops) 45%, var(--line)); }
+.topo-zone.em rect { stroke: color-mix(in srgb, var(--topo-em) 45%, var(--line)); }
+.topo-zone.verify rect { stroke: color-mix(in srgb, var(--topo-verify) 45%, var(--line)); }
+.topo-node { cursor: pointer; outline: none; }
+.topo-node .body { fill: var(--diagram-node); stroke: var(--line-strong); stroke-width: 1; transition: stroke .15s ease; }
+.topo-node:hover .body, .topo-node:focus-visible .body { stroke: var(--blue); }
+.topo-node.selected .body { stroke: var(--blue); stroke-width: 2; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--blue) 55%, transparent)); }
+.topo-node .tint { fill: var(--line-strong); }
+.topo-node.core .tint { fill: var(--topo-core); } .topo-node.ops .tint { fill: var(--topo-ops); } .topo-node.em .tint { fill: var(--topo-em); } .topo-node.verify .tint { fill: var(--topo-verify); }
+.topo-node .name { fill: var(--diagram-text); font-size: 13px; font-weight: 700; }
+.topo-node .role { color: var(--muted); font-size: 11px; line-height: 15px; word-break: keep-all; overflow-wrap: anywhere; }
+.topo-node .placement { fill: var(--muted); font-size: 9px; font-weight: 700; }
+.topo-node .dot { fill: var(--line-strong); }
+.topo-node.ok .dot { fill: var(--green); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--green) 70%, transparent)); }
+.topo-node.warn .dot { fill: var(--red); animation: topo-blink 1.2s ease-in-out infinite; }
+.topo-node.idle .dot { fill: var(--line-strong); }
+.topo-node.idle .body { stroke-dasharray: 3 3; }
+.topo-edge { cursor: pointer; outline: none; }
+.topo-edge .hit { fill: none; stroke: transparent; stroke-width: 16; }
+.topo-edge .rail { fill: none; stroke: none; pointer-events: none; }
+.topo-edge .line { fill: none; stroke: var(--line-strong); stroke-width: 1.6; stroke-linecap: round; transition: stroke-width .15s ease; }
+/* Connected: a solid line with a glow, dashes streaming along it and a packet running each way. */
+.topo-edge .flow, .topo-edge .packet, .topo-edge .draw { display: none; }
+.topo-edge.active .line { stroke: var(--blue); stroke-width: 2.4; filter: drop-shadow(0 0 3px color-mix(in srgb, var(--blue) 65%, transparent)); }
+.topo-edge.active .flow { display: block; fill: none; stroke: var(--topo-flow); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 5 17; opacity: .9; animation: topo-flow .9s linear infinite; pointer-events: none; }
+.topo-edge.active .packet { display: block; fill: var(--topo-flow); stroke: var(--blue); stroke-width: 1.2; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--blue) 90%, transparent)); pointer-events: none; }
+.topo-edge.active .packet.reverse { opacity: .75; }
+/* Just connected: the line draws itself from one end to the other before the flow starts. */
+.topo-edge.connecting .line, .topo-edge.connecting .flow, .topo-edge.connecting .packet { opacity: 0; animation: topo-appear .2s linear both; animation-delay: calc(var(--draw-delay, 0ms) + .75s); }
+.topo-edge.connecting .draw { display: block; fill: none; stroke: var(--blue); stroke-width: 2.6; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--blue) 90%, transparent)); animation: topo-draw .8s cubic-bezier(.4, 0, .2, 1) both; animation-delay: var(--draw-delay, 0ms); pointer-events: none; }
+.topo-edge.down .line { stroke: var(--red); stroke-width: 2; stroke-dasharray: 7 5; animation: topo-blink 1.4s ease-in-out infinite; }
+.topo-edge.standby .line { stroke: var(--line-strong); stroke-dasharray: 2 5; opacity: .75; }
+.topo-edge.disabled .line { stroke: var(--orange); stroke-dasharray: 10 6; opacity: .7; }
+.topo-edge.unknown .line { stroke: var(--orange); stroke-width: 1.8; stroke-dasharray: 1 6; opacity: .85; animation: topo-blink 1.8s ease-in-out infinite; }
+.topo-edge:hover .line, .topo-edge:focus-visible .line, .topo-edge.related .line { stroke-width: 3; }
+.topo-edge.selected .line { stroke-width: 3.6; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--blue) 60%, transparent)); }
+.topo-edge.selected.down .line { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--red) 60%, transparent)); }
+.topo-edge .pill rect { fill: var(--surface); stroke: var(--blue); stroke-width: 1; }
+.topo-edge .pill text { fill: var(--blue); font-size: 9.5px; font-weight: 800; letter-spacing: .04em; }
+.topo-edge.down .pill rect { stroke: var(--red); } .topo-edge.down .pill text { fill: var(--red); }
+.topo-edge.standby .pill rect { stroke: var(--line-strong); } .topo-edge.standby .pill text { fill: var(--muted); }
+.topo-edge.disabled .pill rect { stroke: var(--orange); } .topo-edge.disabled .pill text { fill: var(--orange); }
+.topo-edge.unknown .pill rect { stroke: var(--orange); } .topo-edge.unknown .pill text { fill: var(--orange); }
+.topo-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 8px; font-size: 10.5px; color: var(--muted); }
+.topo-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.topo-legend span::before { content: ""; width: 22px; height: 0; border-top: 2px solid var(--line-strong); }
+.topo-legend .active::before { border-color: var(--blue); }
+.topo-legend .down::before { border-top-style: dashed; border-color: var(--red); }
+.topo-legend .standby::before { border-top-style: dotted; }
+.topo-legend .disabled::before { border-top-style: dashed; border-color: var(--orange); }
+.topo-legend .unknown::before { border-top-style: dotted; border-color: var(--orange); }
+.topo-legend .rtt { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
+.topo-legend .rtt::before { display: none; }
+.topo-legend .rtt.warn { color: var(--orange); }
+.summary-chip.unknown i { background: var(--orange); }
+@keyframes topo-flow { to { stroke-dashoffset: -22; } }
+@keyframes topo-blink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@keyframes topo-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes topo-appear { from { opacity: 0; } to { opacity: 1; } }
+#view-settings .settings-links-panel { flex: 0 0 auto; max-height: 320px; display: flex; flex-direction: column; min-height: 0; }
+#view-settings .settings-links-panel .table-wrap { flex: 1; min-height: 0; overflow: auto; }
+#view-settings .settings-links-panel tbody tr { cursor: pointer; }
+#view-settings .settings-links-panel tbody tr.active td { background: color-mix(in srgb, var(--blue) 10%, transparent); }
+#view-settings .settings-links-panel td.muted { color: var(--muted); max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+#view-settings th { position: sticky; top: 0; z-index: 1; }
+#view-settings .settings-detail-panel { flex: 0 0 auto; overflow: auto; }
+#view-settings .settings-icd-panel { flex: 0 0 auto; min-height: 0; display: flex; flex-direction: column; }
+#view-settings .settings-icd-panel .table-wrap { flex: 1; min-height: 0; overflow: auto; }
+#view-settings .settings-icd-panel tbody tr { cursor: pointer; }
+.link-button { appearance: none; border: 0; padding: 0; background: transparent; color: var(--blue); font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 2px; }
+.link-button:hover { color: var(--navy); }
+.settings-empty { display: grid; gap: 6px; padding: 18px 12px; }
+.settings-empty strong { color: var(--text); font-size: 12px; }
+.detail-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.detail-head small { color: var(--muted); font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+.detail-head h3 { margin: 3px 0 0; font-size: 15px; color: var(--navy); }
+html[data-theme="dark"] .detail-head h3 { color: var(--text); }
+.detail-reason { margin: 8px 0 10px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--panel-inset); border-left: 3px solid var(--line-strong); font-size: 11px; color: var(--muted); }
+.detail-reason.active { border-left-color: var(--green); } .detail-reason.down { border-left-color: var(--red); } .detail-reason.disabled { border-left-color: var(--orange); }
+.detail-title { margin: 12px 0 6px; display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); font-weight: 800; letter-spacing: .06em; }
+.detail-list.compact > div { padding: 4px 0; }
+.detail-bullets { margin: 0; padding-left: 16px; font-size: 11px; display: grid; gap: 3px; }
+.link-form { display: grid; gap: 8px; }
+.link-form label { display: grid; gap: 4px; font-size: 10.5px; font-weight: 700; color: var(--muted); }
+.link-form .form-grid { gap: 8px; }
+.link-form .link-toggles { display: flex; gap: 14px; }
+.link-form label.check { grid-auto-flow: column; justify-content: start; align-items: center; gap: 6px; color: var(--text); }
+.link-form .link-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.link-form .link-actions .button { min-height: 30px; padding: 0 11px; font-size: 11px; }
+.link-test { padding: 7px 10px; border-radius: var(--radius-sm); font-size: 11px; font-weight: 700; background: var(--panel-inset); color: var(--muted); }
+.link-test.ok { color: var(--green); } .link-test.fail { color: var(--red); }
+.modal.wide { width: min(880px, 94vw); }
+.icd-meta { grid-template-columns: 1fr 1fr; column-gap: 18px; }
+.icd-summary { margin: 4px 0 0; font-size: 11.5px; line-height: 1.5; }
+.icd-table { max-height: 300px; overflow: auto; }
+.icd-table td.wrap { white-space: normal; min-width: 220px; line-height: 1.35; }
+@media (max-width: 1450px) {
+  #view-status { grid-template-columns: minmax(480px, 1.3fr) minmax(320px, 1fr); }
+}
+@media (max-width: 1550px) {
+  #view-settings { grid-template-columns: minmax(0, 1fr); }
+  #view-settings .settings-side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+}
+@media (max-width: 900px) {
+  #view-settings .settings-side { grid-template-columns: minmax(0, 1fr); }
+}

@@ -11,6 +11,8 @@ from .missions import MissionRuntime
 from digital_twin.simulation.telemetry import calculate_telemetry
 from digital_twin.simulation.mock_hil import apply_device_action, preflight
 from digital_twin.contracts.state import RuntimeSnapshot
+from digital_twin.contracts.data_management import DataDeploymentConflict
+from digital_twin.simulation.data_deployment import deployment_inputs, deployment_products
 
 
 class RuntimeState:
@@ -39,6 +41,9 @@ class RuntimeState:
         self._stop = asyncio.Event()
         self._last_snapshot_second = -1
         self.current_telemetry: dict[str, Any] = {}
+        self._data_deployment = {"deployment_id": None, "revision": 0, "nodes": []}
+        self._deployment_ids: set[str] = set()
+        self._data_scope_started_s = self.elapsed_seconds
         self._refresh_telemetry()
         self._emit("runtime.started", "info", "시뮬레이션 런타임 시작")
 
@@ -54,6 +59,40 @@ class RuntimeState:
             sequence=self.sequence, run_id=self.run_id, scenario_id=self.scenario_id,
             mode=self.mode, recording=self.recording,
         )
+
+    def data_deployment(self) -> dict:
+        deployment_id = self._data_deployment["deployment_id"]
+        scope = f"deployment:{deployment_id}" if deployment_id is not None else "unconfigured"
+        return {**deepcopy(self._data_deployment), "run_id": self.run_id,
+                "scope_id": f"{self.run_id}:{scope}"}
+
+    def _data_context(self, deployment: dict | None = None, start_s: float | None = None) -> dict:
+        accepted = deployment or self.data_deployment()
+        return {"deployment": deepcopy(accepted), "runtime": self.status(),
+                "started_s": self._data_scope_started_s if start_s is None else start_s,
+                "inputs": deployment_inputs(accepted, deepcopy(self.faults)), "products": deployment_products}
+
+    async def apply_data_deployment(self, command: dict, activate) -> dict:
+        async with self._lock:
+            current = self.data_deployment()
+            if command["deployment_id"] == current["deployment_id"] and command["nodes"] == current["nodes"]:
+                return current
+            if command["expected_revision"] != current["revision"] or command["deployment_id"] in self._deployment_ids:
+                raise DataDeploymentConflict("서버 배치 버전이 달라졌습니다. 현재 배치를 다시 확인하세요.")
+            candidate = {"deployment_id": command["deployment_id"], "revision": current["revision"] + 1,
+                         "nodes": deepcopy(command["nodes"]), "run_id": self.run_id,
+                         "scope_id": f"{self.run_id}:deployment:{command['deployment_id']}"}
+            # Publish configuration only after the separately addressed module accepts its roster.
+            await activate(self._data_context(candidate, self.elapsed_seconds))
+            self._data_deployment = {key: deepcopy(candidate[key]) for key in ("deployment_id", "revision", "nodes")}
+            self._deployment_ids.add(command["deployment_id"])
+            self._data_scope_started_s = self.elapsed_seconds
+            return self.data_deployment()
+
+    async def with_data_deployment(self, consume):
+        """Serialize accepted configuration, run reset and the complete ICD exchange."""
+        async with self._lock:
+            return await consume(self._data_context())
 
     async def start(self) -> None:
         if self._task and not self._task.done():
@@ -125,6 +164,7 @@ class RuntimeState:
             elif action == "reset":
                 self.running = False
                 self.elapsed_seconds = 0.0
+                self._data_scope_started_s = 0.0
                 self.faults.clear()
                 self.run_id = f"RUN-{uuid.uuid4().hex[:12].upper()}"
                 self.started_at = datetime.now(timezone.utc)
@@ -148,10 +188,23 @@ class RuntimeState:
         async with self._lock:
             self.scenario_id = scenario_id
             self.elapsed_seconds = 0.0
+            self._data_scope_started_s = 0.0
             self.faults.clear()
             self.run_id = f"RUN-{uuid.uuid4().hex[:12].upper()}"
             self.started_at = datetime.now(timezone.utc)
             self._emit("scenario.loaded", "info", f"{scenario_id} 시나리오 로드")
+            return self.status()
+
+    async def advance(self, seconds: float) -> dict:
+        """Move the simulation clock forward (never backward): the scenario player's skip."""
+        if not (0 < float(seconds) <= 3600):
+            raise ValueError("시계 전진은 0초 초과 3600초 이하만 가능합니다.")
+        async with self._lock:
+            self.elapsed_seconds += float(seconds)
+            self.sequence += 1
+            self._expire_faults()
+            self._refresh_telemetry()
+            self._emit("runtime.advance", "info", f"시계 {float(seconds):g}초 전진", {"seconds": float(seconds)})
             return self.status()
 
     async def inject_fault(self, request: dict) -> dict:

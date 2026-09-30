@@ -1,0 +1,13 @@
+"""ICD-08 contract for SIM security observations, not cryptographic verification."""
+from typing import Protocol
+
+
+class SecurityUnavailable(RuntimeError):
+    """The configured security module failed or returned an incompatible response."""
+
+
+class SecurityLink(Protocol):
+    def observe(self, message: dict) -> dict: ...
+    def overview(self) -> dict: ...
+    def events(self, after: int = 0) -> dict: ...
+    def status(self) -> dict: ...

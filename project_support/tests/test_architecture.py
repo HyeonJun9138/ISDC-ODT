@@ -3,7 +3,7 @@ import ast
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-LAYERS = {'communication', 'data', 'digital_twin', 'user_application'}
+LAYERS = {'communication', 'data', 'digital_twin', 'user_application', 'operations_software'}
 
 
 def imports(path):
@@ -26,7 +26,9 @@ def test_python_dependency_boundaries():
         'digital_twin/contracts': ('digital_twin.contracts',),
         'digital_twin/verification': ('digital_twin.contracts', 'digital_twin.verification'),
         'communication/http': ('communication.http', 'digital_twin.contracts', 'data.catalog.contracts', 'data.exports'),
-        'communication/external': ('communication.external',),
+        'communication/external': ('communication.external', 'digital_twin.contracts'),
+        # Partner software stand-ins never import the twin; the twin reaches them only through ICD messages.
+        'operations_software': ('operations_software',),
         'data': ('data', 'digital_twin.contracts', 'digital_twin.simulation', 'digital_twin.model_library'),
     }
     for folder, allowed in policies.items():

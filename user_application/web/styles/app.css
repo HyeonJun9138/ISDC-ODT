@@ -32,3 +32,63 @@
 h3 { margin: 5px 0; font-size: 16px; }
 .success-text { color: var(--green) !important; }
 .danger-text { color: var(--red) !important; }
+/* Compact top bar: tabs hug the left edge, the title block sits in the exact centre, actions on the right. */
+.topbar { grid-template-columns: 1fr auto 1fr; gap: 12px; }
+/* Every tab column is the same width (sized by the widest label), so the gap between label and divider is identical for all six. */
+.main-nav { justify-self: start; width: auto; min-width: 0; height: 34px; display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; justify-content: start; }
+.nav-tab { padding: 0 14px; font-size: 12px; letter-spacing: .01em; white-space: nowrap; text-align: center; }
+/* Centre block: product title with a plain UTC readout underneath (no chip/box), kept within the header height. */
+.topbar-center { justify-self: center; display: grid; justify-items: center; gap: 4px; min-width: 0; }
+.app-title { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.01em; color: var(--navy); white-space: nowrap; line-height: 1.1; }
+html[data-theme="dark"] .app-title { color: var(--text); }
+.topbar-clock { display: inline-flex; align-items: baseline; gap: 5px; line-height: 1; color: var(--muted); }
+.topbar-clock time { font-family: "Consolas", "SFMono-Regular", Menlo, monospace; font-variant-numeric: tabular-nums; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
+.topbar-clock span { font-size: 9.5px; font-weight: 700; letter-spacing: .1em; }
+/* Start-up screen: covers the console until bootstrap, Cesium, the GP catalogue and propagation are ready.
+   The shown value is eased by loading.js; the sheen, orbit and phase list keep the screen visibly alive. */
+.app-loading { --text: #edf4fc; --muted: #b5c4d6; --navy: #edf4fc; --line: rgba(180, 202, 226, .22); --line-strong: rgba(180, 202, 226, .4); position: fixed; inset: 0; z-index: 5000; display: grid; place-items: center; overflow: hidden; background: #07121e; color: var(--text); transition: opacity .6s ease; }
+.app-loading[data-state="done"] { opacity: 0; pointer-events: none; }
+.app-loading[data-state="done"] .loading-card { transform: translateY(-6px) scale(1.02); }
+.app-loading[hidden] { display: none; }
+.loading-backdrop { position: absolute; inset: 0; pointer-events: none; }
+/* Extend past the viewport so the blur does not reveal an unfilled edge. */
+.loading-backdrop::before { content: ""; position: absolute; inset: -6px; background: var(--loading-background, none) center / cover no-repeat; filter: blur(2px); }
+.loading-backdrop::after { content: ""; position: absolute; inset: 0; background:
+  radial-gradient(ellipse at center, rgba(6, 17, 30, .55), transparent 75%),
+  linear-gradient(180deg, rgba(6, 17, 30, .25), rgba(6, 17, 30, .48)); }
+.loading-card { position: relative; width: min(460px, 84vw); display: grid; gap: 10px; justify-items: center; text-align: center; transition: transform .6s ease; }
+.loading-orbit { position: relative; width: 84px; height: 84px; margin-bottom: 6px; }
+.loading-orbit i { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(65, 182, 230, .35); animation: loading-spin 3.6s linear -.45s infinite; }
+.loading-orbit i::after { content: ""; position: absolute; top: -3px; left: 50%; width: 6px; height: 6px; margin-left: -3px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px rgba(65, 182, 230, .9); }
+.loading-orbit i:nth-child(2) { inset: 16px; border-color: rgba(45, 127, 249, .35); animation-duration: 2.4s; animation-delay: -.9s; animation-direction: reverse; }
+.loading-orbit i:nth-child(2)::after { width: 4px; height: 4px; margin-left: -2px; top: -2px; background: var(--blue); box-shadow: 0 0 8px rgba(45, 127, 249, .9); }
+.loading-orbit b { position: absolute; inset: 34px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #7cc4ff, #0d3f7b 70%); box-shadow: 0 0 22px rgba(45, 127, 249, .55); }
+@keyframes loading-spin { to { transform: rotate(360deg); } }
+.loading-kicker { font-size: 10px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; color: var(--cyan); }
+.loading-card h1 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -.01em; color: var(--navy); }
+html[data-theme="dark"] .loading-card h1 { color: var(--text); }
+.loading-percent { margin-top: 8px; font-family: "Consolas", "SFMono-Regular", Menlo, monospace; font-variant-numeric: tabular-nums; font-size: 36px; font-weight: 700; line-height: 1; letter-spacing: -.02em; color: var(--text); }
+.loading-bar { position: relative; width: 100%; height: 4px; border-radius: 999px; background: var(--line); overflow: hidden; }
+.loading-bar i { position: relative; display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--blue), var(--cyan)); box-shadow: 0 0 12px rgba(65, 182, 230, .55); overflow: hidden; }
+.loading-bar i::after { content: ""; position: absolute; top: 0; bottom: 0; left: -40%; width: 40%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .55), transparent); animation: loading-sheen 1.6s ease-in-out infinite; }
+@keyframes loading-sheen { to { left: 110%; } }
+.loading-step { min-height: 16px; font-size: 12px; color: var(--muted); }
+.loading-step::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; vertical-align: 1px; background: var(--cyan); animation: loading-pulse 1.2s ease-in-out infinite; }
+@keyframes loading-pulse { 0%, 100% { opacity: .35; transform: scale(.8); } 50% { opacity: 1; transform: scale(1); } }
+.loading-phases { width: 100%; margin: 10px 0 0; padding: 12px 14px; display: grid; gap: 5px; list-style: none; text-align: left; border: 1px solid var(--line); border-radius: 12px; background: rgba(6, 17, 30, .6); }
+.loading-phases li { display: flex; align-items: center; gap: 9px; font-size: 11px; color: var(--muted); opacity: .55; transition: opacity .3s ease, color .3s ease; }
+.loading-phases li i { width: 12px; height: 12px; flex: 0 0 auto; border-radius: 50%; border: 1px solid var(--line-strong); display: grid; place-items: center; font-size: 8px; line-height: 1; }
+.loading-phases li[data-status="active"] { opacity: 1; color: var(--text); }
+.loading-phases li[data-status="active"] i { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(65, 182, 230, .18); animation: loading-pulse 1.2s ease-in-out infinite; }
+.loading-phases li[data-status="done"] { opacity: .85; }
+.loading-phases li[data-status="done"] i { border-color: var(--green); background: var(--green); color: white; }
+.loading-phases li[data-status="done"] i::after { content: "\2713"; }
+.app-loading .loading-retry { display: none; margin-top: 6px; }
+.app-loading[data-state="failed"] .loading-bar i { background: var(--red); box-shadow: none; }
+.app-loading[data-state="failed"] .loading-bar i::after, .app-loading[data-state="failed"] .loading-step::before { display: none; }
+.app-loading[data-state="failed"] .loading-step { color: var(--red); }
+.app-loading[data-state="failed"] .loading-retry { display: inline-flex; }
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the requested orbit loading indicator active; suppress the decorative effects. */
+  .loading-bar i::after, .loading-step::before, .loading-phases li i { animation: none; }
+}

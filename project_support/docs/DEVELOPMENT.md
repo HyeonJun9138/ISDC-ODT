@@ -10,6 +10,16 @@ user_application이 모든 계층을 조립한다. communication/http는 주입�
 
 현재 상태는 RuntimeState 아래에만 둔다. 잠금 범위 안에서 명령을 처리하고 snapshot을 발행한다. 읽기와 export는 상태를 바꾸지 않는다. 브라우저 store는 화면용 사본이며 서버 상태의 권위자가 아니다. 모의 HIL 함수는 전달된 입력의 사본을 계산하며 장비 상태 소유자가 아니다. 메모리 이벤트 목록은 현재 실행의 제한된 진단 이력이다. 영구 기록 또는 replay로 주장하지 않는다.
 
+궤도 탭의 독립 분석 시각은 UI의 조회 커서이지 서버 SIM 런타임 상태가 아니다. 이 시각을 바꿔도 서버 제어 API를 호출하지 않는다. 궤도 수치와 출처를 확장할 때는 `development/orbit_console.md`의 단위, 좌표계, DEMO와 GP의 구분 및 결측 규칙을 따른다.
+
+임무 탭의 임무 요청과 계획은 브라우저 localStorage에 있는 화면 구성이며 서버 런타임 상태가 아니다. 창 계산은 `digital_twin/simulation/browser/mission_windows.js`, 배정과 판정은 `operations_software/orchestration`(ICD-03)이 맡고 브라우저는 배정을 대신하지 않는다. 기존 시나리오 임무 API(`/api/missions/*`)는 SIM 런타임의 것이며 REST로만 남는다. 규칙은 `development/mission_console.md`를 따른다.
+
+노드 탭의 작업 세트와 궤도 구성은 브라우저 localStorage에 있는 화면 구성이다. 데이터 운용에 필요한 ID, 이름, 모드와 장비 배치는 서버 수락 후 확정하며 그 사본과 버전은 RuntimeState가 소유한다. 데이터 모듈은 실행과 배치의 범위별로 카탈로그와 작업을 분리한다. 상세 계약은 development/data_deployment_design.md를 따른다. 노드 궤도는 명시적 Kepler+J2 정의이고 OISL 단말 상태는 기하 모델이므로 GP, SIM 텔레메트리, 실측과 섞어 표현하지 않는다. 노드 모델 정의는 `digital_twin/model_library/browser`, 다이나믹스와 단말 모델은 `digital_twin/simulation/browser`, 다중 모델 장면은 `digital_twin/visualization/node_scene.js`에 두며 규칙은 `development/node_sandbox.md`를 따른다.
+
+시나리오 재생기는 서버 SIM 시계를 시나리오 시각으로 쓰며 모든 탭의 `OrbitClock`이 `followAll()`로 이를 따른다. 재생 중 탭의 시계 조작은 런타임 제어 API로 위임되고 시계는 앞으로만 간다(`/api/scenario/advance`). 브라우저의 OISL 단말 이력과 ICD-02 네트워크 메시지는 `scripts/communication/network_twin.js` 하나가 소유하며 통신 탭과 재생기는 이를 공유한다. ICD-03 편성 요청은 `scripts/missions/planner.js`가 임무 탭과 재생기 양쪽에 만들고 실행 확정·중단은 OR-03으로 모듈에 통보한다. 시나리오 정의는 `user_application/configs/scenarios.py`의 데이터이고 판정은 `digital_twin/verification/browser/scenario_kpi.js`의 순수 함수다. 규칙은 `development/scenario_console.md`, 모듈 구분은 `architecture/modules.md`를 따른다.
+
+타 기관이 개발하는 운용 SW는 operations_software에 임시 구현을 두고 ICD 메시지로만 연결한다. 디지털 트윈은 그 폴더를 import하지 않고 contracts의 계약과 communication/http의 경로만 본다. 데이터 관리(ICD-01)는 데이터 객체의 배치·복제·정합성·서비스를, 데이터 패브릭(ICD-02)은 링크 품질·경로·전달을, 군집 운용(ICD-03)은 임무별 작업 배정과 확정을, 보안 운용(ICD-08)은 인증률 판정을 담당하며 서로의 상태를 소유하지 않는다. 트윈 측 브리지는 시뮬레이션 시각과 저장 노드 가용성, 생성된 데이터 제품만 보내고 모듈이 보고한 값을 그대로 표시한다.
+
 ## 새 모듈 작성 절차
 
 1. 기존 경계 중 책임이 맞는 곳을 선택한다. 이름만 다른 중복 구현을 만들지 않는다.

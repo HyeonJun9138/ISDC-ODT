@@ -17,6 +17,9 @@ venv/
 !.env.example
 *.pem
 *.key
+/credentials.json
+/.claude/
+/project_support/output/
 
 # Local planning material and pre-refactoring copies are not runtime source.
 /project_support/reference/

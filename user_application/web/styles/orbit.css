@@ -1,0 +1,181 @@
+/* Orbit-only console. Other tabs retain their layout and simulation controls. */
+body:has(#view-orbit.active) #run-chip { display: none; }
+#view-orbit { --oc-accent: #2266a6; grid-template-columns: 300px minmax(0,1fr) 330px; grid-template-rows: minmax(220px,1fr) 52px 214px 24px; gap: 6px; font-size: 12px; font-variant-numeric: tabular-nums; animation: none; }
+#view-orbit .oc-panel { background: var(--surface); border: 1px solid var(--line-strong); border-radius: 3px; min-height: 0; min-width: 0; box-shadow: none; }
+#view-orbit h2, #view-orbit h3, #view-orbit p { margin: 0; }
+#view-orbit h2 { font-size: 13px; font-weight: 650; }
+#view-orbit h3 { font-size: 11px; font-weight: 700; }
+#view-orbit button, #view-orbit select, #view-orbit input { height: 28px; min-width: 0; padding: 0 7px; border: 1px solid var(--line); border-radius: 3px; color: var(--text); background: var(--control-bg); font-size: 11px; }
+#view-orbit button { cursor: pointer; white-space: nowrap; }
+#view-orbit button:hover { background: var(--control-hover); border-color: var(--line-strong); }
+#view-orbit button[aria-pressed="true"] { color: var(--oc-accent); background: color-mix(in srgb,var(--oc-accent) 10%,var(--control-bg)); border-color: color-mix(in srgb,var(--oc-accent) 50%,var(--line)); }
+#view-orbit button:disabled { opacity: .45; cursor: default; }
+#view-orbit :focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+#view-orbit [hidden] { display: none !important; }
+#view-orbit .oc-catalog { grid-column: 1; grid-row: 1 / 4; display: flex; flex-direction: column; overflow: hidden; }
+#view-orbit .oc-heading { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+#view-orbit .oc-heading button { width: 26px; font-size: 17px; }
+#view-orbit .oc-filters { padding: 9px; display: grid; gap: 6px; }
+#view-orbit .oc-filters > input { height: 31px; }
+#view-orbit .oc-filter-pair { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 5px; }
+#view-orbit .oc-list-summary { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); padding: 3px 10px 8px; }
+#view-orbit .oc-list-head, #view-orbit .oc-satellite-row { display: grid; grid-template-columns: 19px minmax(0,1fr) 48px 31px 42px; gap: 3px; align-items: center; }
+#view-orbit .oc-list-head { flex: 0 0 28px; padding: 0 8px; border-block: 1px solid var(--line); background: var(--panel-inset); color: var(--muted); }
+#view-orbit .oc-list-head button { padding: 0; border: 0; font-size: 10px; text-align: left; background: transparent; color: var(--muted); }
+#view-orbit .oc-list-head button:nth-child(n+3) { text-align: right; }
+#view-orbit .oc-list-head i { font-size: 9px; font-style: normal; color: var(--oc-accent); }
+#view-orbit .oc-list { flex: 1; position: relative; overflow: auto; min-height: 100px; scrollbar-width: thin; }
+#view-orbit .oc-list-space { position: relative; }
+#view-orbit .oc-satellite-row { position: absolute; left: 0; right: 0; height: 32px; padding: 0 8px; cursor: pointer; user-select: none; border-bottom: 1px solid color-mix(in srgb,var(--line) 65%,transparent); }
+#view-orbit .oc-satellite-row:nth-child(even) { background: color-mix(in srgb,var(--panel-inset) 60%,transparent); }
+#view-orbit .oc-satellite-row:hover { background: var(--control-hover); }
+#view-orbit .oc-satellite-row[aria-selected="true"] { background: color-mix(in srgb,var(--oc-accent) 12%,var(--surface)); box-shadow: inset 3px 0 var(--oc-accent); }
+#view-orbit .oc-satellite-row > b { font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+#view-orbit .oc-satellite-row > span { font-family: "Consolas",monospace; font-size: 10px; text-align: right; }
+#view-orbit .oc-star { color: var(--muted); text-align: center !important; font-family: inherit !important; }
+#view-orbit .oc-star.saved { color: var(--orange); }
+#view-orbit [data-orbit="LEO"] { color: #bb712c; }
+#view-orbit [data-orbit="MEO"] { color: #8d8721; }
+#view-orbit [data-orbit="GEO"] { color: #238054; }
+#view-orbit [data-orbit="HEO"] { color: #24829f; }
+#view-orbit .oc-old { color: #b97025; }
+#view-orbit .oc-catalog-foot { border-top: 1px solid var(--line); padding: 7px 9px; display: flex; flex-direction: column; gap: 3px; font-size: 9px; color: var(--muted); }
+#view-orbit .oc-empty { padding: 28px 14px; color: var(--muted); line-height: 1.8; text-align: center; }
+#view-orbit .oc-scene { grid-column: 2; grid-row: 1; min-height: 0; position: relative; overflow: hidden; border: 1px solid #253444; border-radius: 3px; background: #050b13; box-shadow: none; }
+#view-orbit .oc-scene-toolbar { position: absolute; inset: 0 0 auto; height: 36px; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 5px; padding: 4px 6px; background: #101b27; border-bottom: 1px solid #2b3948; }
+#view-orbit .oc-scene-toolbar > div { display: flex; gap: 3px; }
+#view-orbit .oc-scene-toolbar button, #view-orbit .oc-scene-toolbar select { background: #142331; color: #becfdd; border-color: #334553; font-size: 10px; height: 25px; padding: 0 6px; }
+#view-orbit .oc-scene-toolbar [aria-pressed="true"] { color: #a7d7ff; border-color: #597c9c; background: #203b52; }
+#view-orbit #orbit-lighting { min-width: 26px; padding: 0 5px; font-size: 13px; line-height: 1; }
+#view-orbit .globe-container, #view-orbit .globe-fallback { position: absolute; inset: 36px 0 25px; width: 100%; height: calc(100% - 61px); }
+#view-orbit .oc-scene-foot { position: absolute; inset: auto 0 0; height: 25px; background: #101b27; color: #97acbf; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 9px; font-size: 9px; }
+#view-orbit .oc-legend { display: flex; gap: 12px; }
+#view-orbit .oc-legend span { display: flex; align-items: center; gap: 4px; }
+#view-orbit .oc-legend i { display: inline-block; width: 4px; height: 4px; background: currentColor; }
+#view-orbit .oc-legend [data-orbit="LEO"] { color: #ff9f43; } #view-orbit .oc-legend [data-orbit="MEO"] { color: #e6ed55; } #view-orbit .oc-legend [data-orbit="GEO"] { color: #5ee277; } #view-orbit .oc-legend [data-orbit="HEO"] { color: #53c8ff; }
+#view-orbit .oc-hover { position: absolute; pointer-events: none; z-index: 7; max-width: 230px; padding: 8px 10px; background: #142230f2; border: 1px solid #546b80; color: #d5e7f5; border-radius: 3px; font-size: 11px; }
+#view-orbit .oc-hover small { display: block; color: #a5b8c8; margin-top: 4px; }
+#view-orbit #space-sun { display: none; }
+#view-orbit .oc-clock { grid-column: 2; grid-row: 2; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 4px 8px; position: relative; gap: 2px 5px; z-index: 6; }
+#view-orbit .oc-time-label { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+#view-orbit .oc-time-label > span { color: var(--muted); font-size: 9px; }
+#view-orbit .oc-time-label time { font-family: "Consolas",monospace; font-size: 13px; font-weight: 600; }
+#view-orbit .oc-time-label small { font-size: 9px; color: var(--muted); }
+#view-orbit .oc-clock-actions { display: flex; align-items: center; gap: 3px; }
+#view-orbit .oc-clock-actions button, #view-orbit .oc-clock-actions select { height: 23px; font-size: 10px; padding: 0 5px; }
+#view-orbit .oc-primary { border-color: var(--oc-accent); color: var(--oc-accent); }
+#view-orbit #orbit-seek-form { position: absolute; top: 100%; right: 0; background: var(--surface); border: 1px solid var(--line-strong); padding: 10px; display: flex; align-items: center; gap: 5px; box-shadow: var(--shadow-soft); }
+#view-orbit #orbit-seek-form label { font-size: 10px; }
+#view-orbit .oc-observer { grid-column: 2; grid-row: 3; display: flex; flex-direction: column; overflow: hidden; }
+#view-orbit .oc-observer-head { display: flex; align-items: center; gap: 6px; padding: 5px 9px; border-bottom: 1px solid var(--line); }
+#view-orbit .oc-observer-head h2 { margin-right: 4px; white-space: nowrap; }
+#view-orbit .oc-observer-head select { height: 24px; font-size: 10px; }
+#view-orbit .oc-observer-head label { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--muted); }
+#view-orbit #observer-visibility { margin-left: auto; font-size: 10px; white-space: nowrap; color: var(--muted); }
+#view-orbit #observer-visibility.visible { color: var(--green); }
+#view-orbit .oc-observation { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 6px 9px; gap: 5px; border-bottom: 1px solid var(--line); }
+#view-orbit .oc-observation > span { display: flex; align-items: baseline; gap: 5px; color: var(--muted); font-size: 10px; }
+#view-orbit .oc-observation b { font-size: 14px; font-weight: 550; color: var(--text); font-family: "Consolas",monospace; }
+#view-orbit .oc-observation small { font-size: 9px; }
+#view-orbit .oc-station-coords { font-size: 9px !important; }
+#view-orbit .oc-pass-heading { display: flex; align-items: center; gap: 8px; padding: 5px 9px 2px; color: var(--muted); font-size: 9px; }
+#view-orbit .oc-pass-heading b { color: var(--text); font-weight: 500; margin-left: 3px; }
+#view-orbit #pass-reference { margin-left: auto; }
+#view-orbit #pass-refresh { height: 20px; font-size: 9px; }
+#view-orbit .oc-pass-timeline { position: relative; height: 15px; flex: 0 0 15px; margin: 2px 10px 5px; background: repeating-linear-gradient(90deg,var(--line) 0 1px,transparent 1px calc(100% / 24)),var(--panel-inset); border-block: 1px solid var(--line); }
+#view-orbit .oc-pass-timeline button { position: absolute; top: 2px; height: 9px; min-width: 3px; padding: 0; border: none; border-radius: 1px; background: var(--oc-accent); }
+#view-orbit .oc-pass-scroll { overflow: auto; min-height: 40px; flex: 1; scrollbar-width: thin; }
+#view-orbit .oc-pass-table { width: 100%; border-collapse: collapse; font-size: 10px; white-space: nowrap; }
+#view-orbit .oc-pass-table th, #view-orbit .oc-pass-table td { padding: 4px 9px; text-align: right; border-bottom: 1px solid var(--line); font-weight: 400; }
+#view-orbit .oc-pass-table th { position: sticky; top: 0; background: var(--panel-inset); color: var(--muted); font-size: 9px; z-index: 1; }
+#view-orbit .oc-pass-table :is(th,td):nth-child(-n+2) { text-align: left; }
+#view-orbit .oc-pass-table th small { font-size: 8px; }
+#view-orbit .oc-pass-table button { border: none; height: auto; padding: 0; color: var(--oc-accent); background: transparent; font-family: "Consolas",monospace; font-size: 10px; }
+#view-orbit .oc-pass-table td[colspan] { text-align: center; padding: 10px; white-space: normal; color: var(--muted); }
+#view-orbit .oc-inspector { grid-column: 3; grid-row: 1 / 4; display: flex; flex-direction: column; overflow: hidden; }
+#view-orbit .oc-inspector-head { padding: 10px 12px; border-bottom: 1px solid var(--line-strong); }
+#view-orbit .oc-inspector-kicker { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); letter-spacing: .04em; margin-bottom: 7px; }
+#view-orbit #selected-model { color: var(--oc-accent); }
+#view-orbit #selected-name { font-size: 19px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; }
+#view-orbit .oc-identity { margin-top: 5px; display: flex; justify-content: space-between; align-items: center; }
+#view-orbit .oc-identity > span { font-family: "Consolas",monospace; }
+#view-orbit #selected-favorite { width: 25px; height: 24px; font-size: 16px; padding: 0; }
+#view-orbit #selected-cospar { font-family: "Consolas",monospace; font-size: 10px; color: var(--muted); }
+#view-orbit .oc-inspector-scroll { overflow: auto; min-height: 0; scrollbar-width: thin; }
+#view-orbit .oc-inspector-section { padding: 10px 12px; border-bottom: 1px solid var(--line); }
+#view-orbit .oc-inspector-section h3 { display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px; }
+#view-orbit .oc-inspector-section h3 span, #view-orbit .oc-inspector-section h3 small { color: var(--muted); font-size: 9px; font-weight: 400; }
+#view-orbit #propagation-state[data-state="ok"] { color: var(--green); }
+#view-orbit #propagation-state[data-state="error"] { color: var(--red); }
+#view-orbit .oc-values { margin: 0; }
+#view-orbit .oc-values > div { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 4px 0; }
+#view-orbit .oc-values dt { color: var(--muted); font-size: 10px; flex-shrink: 0; }
+#view-orbit .oc-values dd { margin: 0; font-size: 11px; text-align: right; overflow-wrap: anywhere; }
+#view-orbit .oc-values dd small { font-size: 9px; color: var(--muted); padding-left: 4px; }
+#view-orbit .oc-source-values dd { font-size: 10px; }
+#view-orbit .oc-note { font-size: 9px; line-height: 1.6; color: var(--muted); margin: 5px 0 !important; }
+#view-orbit #profile-celestrak-link { font-size: 10px; color: var(--oc-accent); text-decoration: none; }
+#view-orbit .oc-statusbar { grid-column: 1 / 4; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; gap: 10px; }
+#view-orbit #catalog-source { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+#view-orbit #orbit-status { flex-shrink: 0; }
+html[data-theme="dark"] #view-orbit { --oc-accent: #79b3e3; }
+html[data-theme="dark"] #view-orbit .oc-old { color: #ddad76; }
+html[data-theme="dark"] #view-orbit [data-orbit="LEO"] { color: #d8a168; } html[data-theme="dark"] #view-orbit [data-orbit="MEO"] { color: #c8c174; } html[data-theme="dark"] #view-orbit [data-orbit="GEO"] { color: #74b697; } html[data-theme="dark"] #view-orbit [data-orbit="HEO"] { color: #78b6c6; }
+@media (max-width: 1400px) { #view-orbit { grid-template-columns: 280px minmax(0,1fr) 296px; } #view-orbit .oc-time-label time { font-size: 12px; } #view-orbit .oc-station-coords { width: 100%; } }
+@media (min-width: 1650px) { #view-orbit { grid-template-rows: minmax(250px,1fr) 48px 240px 24px; } #view-orbit .oc-satellite-row > b { font-size: 12px; } }
+@media (max-width: 1050px) { body:has(#view-orbit.active) .app-shell { min-width: 760px; } #view-orbit { grid-template-columns: 240px minmax(0,1fr); grid-template-rows: 340px 58px 230px auto 24px; height: auto; } #view-orbit .oc-inspector { grid-column: 1 / 3; grid-row: 4; max-height: 520px; } #view-orbit .oc-statusbar { grid-column: 1 / 3; grid-row: 5; } }
+@media (max-width: 1050px) {
+  body:has(#view-orbit.active) .topbar { grid-template-columns: 1fr auto 1fr; gap: 8px; }
+  body:has(#view-orbit.active) .main-nav { min-width: 0; width: auto; }
+  body:has(#view-orbit.active) #source-chip { display: none; }
+}
+/* Explanatory notes stay in the DOM for state logic but are not shown in the inspector. */
+#view-orbit .oc-inspector .oc-note, #view-orbit #shape-note { display: none; }
+/* Orbit class filter as a pressed-button group instead of a drop-down. */
+#view-orbit .oc-regime { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 3px; }
+#view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="SDC"] { color: #3ddc84; border-color: #3ddc84; background: color-mix(in srgb, #3ddc84 12%, var(--control-bg)); }
+#view-orbit .oc-regime button { padding: 0 2px; height: 26px; font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="LEO"] { color: #bb712c; border-color: #bb712c; background: color-mix(in srgb, #bb712c 12%, var(--control-bg)); }
+#view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="MEO"] { color: #8d8721; border-color: #8d8721; background: color-mix(in srgb, #8d8721 12%, var(--control-bg)); }
+#view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="GEO"] { color: #238054; border-color: #238054; background: color-mix(in srgb, #238054 12%, var(--control-bg)); }
+#view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="HEO"] { color: #24829f; border-color: #24829f; background: color-mix(in srgb, #24829f 12%, var(--control-bg)); }
+html[data-theme="dark"] #view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="LEO"] { color: #d8a168; border-color: #d8a168; }
+html[data-theme="dark"] #view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="MEO"] { color: #c8c174; border-color: #c8c174; }
+html[data-theme="dark"] #view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="GEO"] { color: #74b697; border-color: #74b697; }
+html[data-theme="dark"] #view-orbit .oc-regime button[aria-pressed="true"][data-orbit-regime="HEO"] { color: #78b6c6; border-color: #78b6c6; }
+#view-orbit #favorites-only { height: 26px; font-size: 10px; }
+/* Light theme: the scene chrome and space backdrop follow the pale UI instead of staying deep-space dark. */
+html[data-theme="light"] #view-orbit .oc-scene { background: #dfe7f0; border-color: var(--line-strong); }
+html[data-theme="light"] #view-orbit .oc-scene-toolbar { background: #f3f6fa; border-bottom-color: var(--line); }
+html[data-theme="light"] #view-orbit .oc-scene-toolbar button, html[data-theme="light"] #view-orbit .oc-scene-toolbar select { background: #ffffff; color: var(--text); border-color: var(--line-strong); }
+html[data-theme="light"] #view-orbit .oc-scene-toolbar button:hover { background: var(--control-hover); }
+html[data-theme="light"] #view-orbit .oc-scene-toolbar [aria-pressed="true"] { color: var(--oc-accent); border-color: color-mix(in srgb, var(--oc-accent) 55%, var(--line)); background: color-mix(in srgb, var(--oc-accent) 10%, #ffffff); }
+html[data-theme="light"] #view-orbit .oc-scene-foot { background: #f3f6fa; color: var(--muted); border-top: 1px solid var(--line); }
+html[data-theme="light"] #view-orbit .oc-legend [data-orbit="LEO"] { color: #c9651a; } html[data-theme="light"] #view-orbit .oc-legend [data-orbit="MEO"] { color: #8f8a12; } html[data-theme="light"] #view-orbit .oc-legend [data-orbit="GEO"] { color: #1f8a55; } html[data-theme="light"] #view-orbit .oc-legend [data-orbit="HEO"] { color: #1f7fa8; }
+html[data-theme="light"] #view-orbit .oc-hover { background: rgba(255, 255, 255, .96); border-color: var(--line-strong); color: var(--text); }
+html[data-theme="light"] #view-orbit .oc-hover small { color: var(--muted); }
+html[data-theme="light"] #view-orbit .globe-loading { color: var(--text); }
+/* Bottom status line removed from the console; the texts stay in the DOM for the scripts that fill them. */
+#view-orbit .oc-statusbar { display: none; }
+#view-orbit { grid-template-rows: minmax(220px, 1fr) 52px 214px; }
+@media (min-width: 1650px) { #view-orbit { grid-template-rows: minmax(250px, 1fr) 48px 240px; } }
+@media (max-width: 1050px) { #view-orbit { grid-template-rows: 340px 58px 230px auto; } }
+/* Imagery credits stay reachable through the small "Data attribution" link; the Cesium ion logo is not
+   required because no Cesium ion service is used (Esri, OSM and Natural Earth imagery only). */
+#view-orbit .cesium-credit-logoContainer { display: none !important; }
+#view-orbit .cesium-widget-credits { font-size: 9px; opacity: .7; }
+#view-orbit .cesium-widget-credits a { font-size: 9px; }
+/* Ground-site card at the top of the right column, shown when a site marker on the globe is clicked. */
+#view-orbit .oc-station-card { padding: 10px 12px; border-bottom: 2px solid var(--oc-accent); background: linear-gradient(180deg, rgba(255, 191, 71, .07), transparent); }
+#view-orbit .oc-station-card header h2 { margin: 0; font-size: 16px; }
+#view-orbit .oc-station-card .oc-inspector-kicker button { border: 0; background: transparent; color: var(--muted); font-size: 14px; line-height: 1; cursor: pointer; padding: 0 2px; }
+#view-orbit .oc-station-card .oc-inspector-kicker button:hover { color: var(--text); }
+#view-orbit .oc-station-region { display: block; margin: 2px 0 6px; font-size: 10px; color: var(--muted); }
+#view-orbit .oc-station-card h3 { display: flex; justify-content: space-between; align-items: center; margin: 8px 0 4px; font-size: 11px; }
+#view-orbit .oc-station-card h3 span { font-size: 9px; font-weight: 700; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--muted); }
+#view-orbit .oc-station-card h3 span[data-state="visible"] { color: var(--green); border-color: var(--green); }
+#view-orbit .oc-station-card h3 span[data-state="hidden"] { color: var(--orange); border-color: var(--orange); }
+#view-orbit .oc-station-card .oc-values dd { margin: 0; font-size: 11px; text-align: right; }
+#view-orbit .oc-station-actions { display: flex; gap: 6px; margin-top: 6px; }
+#view-orbit .oc-station-actions button { flex: 1; height: 26px; font-size: 11px; }
+#view-orbit .oc-station-actions button:disabled { opacity: .6; cursor: default; }

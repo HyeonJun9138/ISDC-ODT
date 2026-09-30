@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 from .dependencies import runtime_of
-from .schemas import RuntimeControl, RuntimeSpeed, FaultRequest, ScenarioSelection
+from .schemas import RuntimeControl, RuntimeSpeed, FaultRequest, ScenarioAdvance, ScenarioSelection
 
 router = APIRouter()
 
@@ -23,6 +23,12 @@ async def runtime_speed(request: Request, command: RuntimeSpeed) -> dict:
 async def scenario_select(request: Request, command: ScenarioSelection) -> dict:
     runtime = runtime_of(request)
     return await runtime.select_scenario(command.scenario_id)
+
+
+@router.post("/api/scenario/advance")
+async def scenario_advance(request: Request, command: ScenarioAdvance) -> dict:
+    runtime = runtime_of(request)
+    return await runtime.advance(command.seconds)
 
 
 @router.post("/api/faults")

@@ -1,0 +1,1957 @@
+{
+  "schema": 2,
+  "display": {
+    "minimum_pixel_size": 12,
+    "thumbnail_width": 640,
+    "focus_range_factor": 3.0
+  },
+  "representatives": {
+    "station": "iss",
+    "cubesat": "cubesat_3u",
+    "payload:LEO": "eo_1",
+    "payload:MEO": "gnss_bus",
+    "payload:GEO": "ssl_1300",
+    "payload:HEO": "van_allen"
+  },
+  "models": [
+    {
+      "key": "iss",
+      "provider": "nasa",
+      "title": "International Space Station (ISS) (B)",
+      "label": "국제우주정거장 ISS",
+      "origin": "International Space Station (ISS) (B)/International Space Station (ISS) (B).glb",
+      "origin_image": "International Space Station (ISS) (B)/International Space Station (ISS) (B).png",
+      "file": "iss.glb",
+      "thumbnail": "iss.jpg",
+      "size_m": 109,
+      "exact": {
+        "norad": [
+          25544
+        ],
+        "names": [
+          "^ISS \\(ZARYA\\)$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 45.544363,
+      "sha256": "2ba4427413b0dd89a33d2acaf962dea8a96a3b1d8dceda05cc7aad547ffd3d16",
+      "bytes": 476992
+    },
+    {
+      "key": "hubble",
+      "provider": "nasa",
+      "title": "Hubble Space Telescope (A)",
+      "label": "허블 우주망원경",
+      "origin": "Hubble Space Telescope (A)/Hubble Space Telescope (A).glb",
+      "origin_image": "Hubble Space Telescope (A)/Hubble Space Telescope (A).png",
+      "file": "hubble.glb",
+      "thumbnail": "hubble.jpg",
+      "size_m": 13.2,
+      "exact": {
+        "norad": [
+          20580
+        ],
+        "names": [
+          "^HST$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 525.488629,
+      "sha256": "e5ba4de15c7d359ac8fa1ab7e286aff42dec09c0fadae3db99252587f39fa384",
+      "bytes": 1694988
+    },
+    {
+      "key": "landsat_7",
+      "provider": "nasa",
+      "title": "Landsat 7",
+      "label": "Landsat 7",
+      "origin": "Landsat 7/Landsat 7.glb",
+      "origin_image": "Landsat 7/Landsat 7.png",
+      "file": "landsat_7.glb",
+      "thumbnail": "landsat_7.jpg",
+      "size_m": 9,
+      "exact": {
+        "norad": [
+          25682
+        ],
+        "names": [
+          "^LANDSAT 7$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 1.255568,
+      "sha256": "0ecb0a11a405d6f21a9cca60a65fdbaaaf1d00e026de50ad55e9074279829687",
+      "bytes": 160156
+    },
+    {
+      "key": "landsat_8",
+      "provider": "nasa",
+      "title": "Landsat 8",
+      "label": "Landsat 8",
+      "origin": "Landsat 8/Landsat 8.glb",
+      "origin_image": "Landsat 8/Landsat 8.png",
+      "file": "landsat_8.glb",
+      "thumbnail": "landsat_8.jpg",
+      "size_m": 11,
+      "exact": {
+        "norad": [
+          39084
+        ],
+        "names": [
+          "^LANDSAT 8$"
+        ]
+      },
+      "series": {
+        "norad": [
+          49260
+        ],
+        "names": [
+          "^LANDSAT 9$"
+        ]
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 12.259474,
+      "sha256": "8b599e867be20589cd35e55ed1d46da104299b430b1827b548a25d3fad0a314d",
+      "bytes": 780280
+    },
+    {
+      "key": "terra",
+      "provider": "nasa",
+      "title": "Terra",
+      "label": "Terra (EOS AM-1)",
+      "origin": "Terra/Terra.glb",
+      "origin_image": "Terra/Terra.png",
+      "file": "terra.glb",
+      "thumbnail": "terra.jpg",
+      "size_m": 15,
+      "exact": {
+        "norad": [
+          25994
+        ],
+        "names": [
+          "^TERRA$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 26053.829635,
+      "sha256": "8794857595f7a7d416184fe926ecb50e11bf267dbe471d1cf2728a85e8d017fa",
+      "bytes": 2150600
+    },
+    {
+      "key": "aqua",
+      "provider": "nasa",
+      "title": "Aqua (B)",
+      "label": "Aqua (EOS PM-1)",
+      "origin": "Aqua (B)/Aqua (B).glb",
+      "origin_image": "Aqua (B)/Aqua (B).png",
+      "file": "aqua.glb",
+      "thumbnail": "aqua.jpg",
+      "size_m": 16.7,
+      "exact": {
+        "norad": [
+          27424
+        ],
+        "names": [
+          "^AQUA$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 17.7775,
+      "sha256": "f0761181a1d378b6b3e270e8eee8bf20c241b7d577933630369b0cffd4b521e1",
+      "bytes": 1104016
+    },
+    {
+      "key": "aura",
+      "provider": "nasa",
+      "title": "Aura (A)",
+      "label": "Aura (EOS CH-1)",
+      "origin": "Aura (A)/Aura (A).glb",
+      "origin_image": "Aura (A)/Aura (A).png",
+      "file": "aura.glb",
+      "thumbnail": "aura.jpg",
+      "size_m": 17,
+      "exact": {
+        "norad": [
+          28376
+        ],
+        "names": [
+          "^AURA$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 50.822115,
+      "sha256": "99d46cd9af551c7511befe47d3f24b9b957da6a9dc35a0e29fc784db9f55b381",
+      "bytes": 476264
+    },
+    {
+      "key": "suomi_npp",
+      "provider": "nasa",
+      "title": "Suomi National Polar-orbiting Partnership (Suomi NPP)",
+      "label": "Suomi NPP / JPSS 계열",
+      "origin": "Suomi National Polar-orbiting Partnership (Suomi NPP)/Suomi National Polar-orbiting Partnership (Suomi NPP).glb",
+      "origin_image": "Suomi National Polar-orbiting Partnership (Suomi NPP)/Suomi National Polar-orbiting Partnership (Suomi NPP).png",
+      "file": "suomi_npp.glb",
+      "thumbnail": "suomi_npp.jpg",
+      "size_m": 9.5,
+      "exact": {
+        "norad": [
+          37849
+        ],
+        "names": [
+          "^SUOMI NPP$"
+        ]
+      },
+      "series": {
+        "norad": [
+          43013,
+          54234
+        ],
+        "names": [
+          "^NOAA 2[01]( \\(JPSS-\\d\\))?$"
+        ]
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 8.958837,
+      "sha256": "885278277ed8fa864368803b7da2046292754bff01033055d56fe86e8b951ee4",
+      "bytes": 2283576
+    },
+    {
+      "key": "goes_r",
+      "provider": "noaa_goesr",
+      "title": "GOES-R Series (NASA VTAD)",
+      "label": "GOES-R 계열 (GOES 16~19)",
+      "origin": "GOES-R_1m.glb",
+      "origin_image": null,
+      "file": "goes_r.glb",
+      "thumbnail": "goes_r.jpg",
+      "size_m": 8.5,
+      "exact": {
+        "norad": [
+          41866,
+          43226,
+          51850,
+          60133
+        ],
+        "names": [
+          "^GOES 1[6-9]$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 0.999998,
+      "sha256": "26f2f289ec9fc78612de27548247c8caf754a6f0efe182290bbf81dc9cbf41e6",
+      "bytes": 6409168
+    },
+    {
+      "key": "goes",
+      "provider": "nasa",
+      "title": "Geostationary Operational Environmental Satellites",
+      "label": "GOES 계열",
+      "origin": "Geostationary Operational Environmental Satellites/Geostationary Operational Environmental Satellites.glb",
+      "origin_image": "Geostationary Operational Environmental Satellites/Geostationary Operational Environmental Satellites.png",
+      "file": "goes.glb",
+      "thumbnail": "goes.jpg",
+      "size_m": 7,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": [
+          "^GOES \\d+$"
+        ]
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 0.134443,
+      "sha256": "e2f690d3d59e101d6a75a8b0bdcbe1cf9f58a058d01eaceede8557460a6e9101",
+      "bytes": 335620
+    },
+    {
+      "key": "tdrs",
+      "provider": "nasa",
+      "title": "Tracking and Data Relay Satellites (TRDS) (E)",
+      "label": "TDRS 데이터 중계위성",
+      "origin": "Tracking and Data Relay Satellites (TRDS) (E)/Tracking and Data Relay Satellites (TRDS) (E).glb",
+      "origin_image": "Tracking and Data Relay Satellites (TRDS) (E)/Tracking and Data Relay Satellites (TRDS) (E).png",
+      "file": "tdrs.glb",
+      "thumbnail": "tdrs.jpg",
+      "size_m": 17.3,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": [
+          "^TDRS \\d+$"
+        ]
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 94.43994,
+      "sha256": "4508756798d827722608aa9001925f01ce6409b9e0fd910eacfde9c061139b9e",
+      "bytes": 216892
+    },
+    {
+      "key": "oco_2",
+      "provider": "nasa",
+      "title": "Orbiting Carbon Observatory (OCO) 2",
+      "label": "OCO-2",
+      "origin": "Orbiting Carbon Observatory (OCO) 2/Orbiting Carbon Observatory (OCO) 2.glb",
+      "origin_image": "Orbiting Carbon Observatory (OCO) 2/Orbiting Carbon Observatory (OCO) 2.png",
+      "file": "oco_2.glb",
+      "thumbnail": "oco_2.jpg",
+      "size_m": 4,
+      "exact": {
+        "norad": [
+          40059
+        ],
+        "names": [
+          "^OCO[ -]?2$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 39.865299,
+      "sha256": "5aba302aaf91fe1a915f1121683aca6ef7ad65d7a82dad65f363361e5009b1ef",
+      "bytes": 280060
+    },
+    {
+      "key": "sdo",
+      "provider": "nasa",
+      "title": "Solar Dynamics Observatory",
+      "label": "Solar Dynamics Observatory",
+      "origin": "Solar Dynamics Observatory/Solar Dynamics Observatory.glb",
+      "origin_image": "Solar Dynamics Observatory/Solar Dynamics Observatory.png",
+      "file": "sdo.glb",
+      "thumbnail": "sdo.jpg",
+      "size_m": 6.25,
+      "exact": {
+        "norad": [
+          36395
+        ],
+        "names": [
+          "^SDO$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 37.034475,
+      "sha256": "8ce4607bd65f098eee22f02717a182d6721610c940a961511dfbca832a3eda95",
+      "bytes": 497844
+    },
+    {
+      "key": "swift",
+      "provider": "nasa",
+      "title": "Swift",
+      "label": "Swift 감마선 관측위성",
+      "origin": "Swift/Swift.glb",
+      "origin_image": "Swift/Swift.png",
+      "file": "swift.glb",
+      "thumbnail": "swift.jpg",
+      "size_m": 5.6,
+      "exact": {
+        "norad": [
+          28485
+        ],
+        "names": [
+          "^SWIFT$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 39.915409,
+      "sha256": "e7074fe1590550747fbcd6803b0c6086b4f57cafd8e3d93789f0b0b7e59b0372",
+      "bytes": 211404
+    },
+    {
+      "key": "tess",
+      "provider": "nasa",
+      "title": "Transiting Exoplanet Survey Satellite (TESS) (A)",
+      "label": "TESS",
+      "origin": "Transiting Exoplanet Survey Satellite (TESS) (A)/Transiting Exoplanet Survey Satellite (TESS) (A).glb",
+      "origin_image": "Transiting Exoplanet Survey Satellite (TESS) (A)/Transiting Exoplanet Survey Satellite (TESS) (A).png",
+      "file": "tess.glb",
+      "thumbnail": "tess.jpg",
+      "size_m": 3.7,
+      "exact": {
+        "norad": [
+          43435
+        ],
+        "names": [
+          "^TESS$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 37.099998,
+      "sha256": "2b82a0191af6f06081368bb59d6cbb63b13ad8f019cd7ad08229e911e5b9ee6a",
+      "bytes": 206576
+    },
+    {
+      "key": "icesat_2",
+      "provider": "nasa",
+      "title": "Ice, Clouds, and Land Elevation Satellite-2 (ICESat-2) (A)",
+      "label": "ICESat-2",
+      "origin": "Ice, Clouds, and Land Elevation Satellite-2 (ICESat-2) (A)/Ice, Clouds, and Land Elevation Satellite-2 (ICESat-2) (A).glb",
+      "origin_image": "Ice, Clouds, and Land Elevation Satellite-2 (ICESat-2) (A)/Ice, Clouds, and Land Elevation Satellite-2 (ICESat-2) (A).png",
+      "file": "icesat_2.glb",
+      "thumbnail": "icesat_2.jpg",
+      "size_m": 7,
+      "exact": {
+        "norad": [
+          43613
+        ],
+        "names": [
+          "^ICESAT-2$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 7.561237,
+      "sha256": "e7d260d69852fcd3367c8e7a3c236f8c0551c591abc5a8e8f42c0356a2eebf38",
+      "bytes": 1499504
+    },
+    {
+      "key": "grace",
+      "provider": "nasa",
+      "title": "Gravity Recovery and Climate Experiment (GRACE) (A)",
+      "label": "GRACE / GRACE-FO 계열",
+      "origin": "Gravity Recovery and Climate Experiment (GRACE) (A)/Gravity Recovery and Climate Experiment (GRACE) (A).glb",
+      "origin_image": "Gravity Recovery and Climate Experiment (GRACE) (A)/Gravity Recovery and Climate Experiment (GRACE) (A).png",
+      "file": "grace.glb",
+      "thumbnail": "grace.jpg",
+      "size_m": 3.1,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [
+          43476,
+          43477
+        ],
+        "names": [
+          "^GRACE-FO"
+        ]
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 3.28884,
+      "sha256": "b376141db89a708acac65484b69ffafe36bbed00709f73c1c9d48cc3d5e3e499",
+      "bytes": 22620
+    },
+    {
+      "key": "jason",
+      "provider": "nasa",
+      "title": "Jason 1",
+      "label": "Jason 계열 해양고도계 위성",
+      "origin": "Jason 1/Jason 1.glb",
+      "origin_image": "Jason 1/Jason 1.png",
+      "file": "jason.glb",
+      "thumbnail": "jason.jpg",
+      "size_m": 9.5,
+      "exact": {
+        "norad": [
+          26997
+        ],
+        "names": [
+          "^JASON(-| )?1$"
+        ]
+      },
+      "series": {
+        "norad": [
+          33105,
+          41240
+        ],
+        "names": [
+          "^JASON"
+        ]
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 634.111306,
+      "sha256": "22139020d17a118aeedfa95b8295712b60f1ed992dcd6770b7a59bac57ea225b",
+      "bytes": 592740
+    },
+    {
+      "key": "sentinel_6",
+      "provider": "nasa",
+      "title": "Jason Continuity of Service (Sentinel-6)",
+      "label": "Sentinel-6 Michael Freilich",
+      "origin": "Jason Continuity of Service (Sentinel-6)/Jason Continuity of Service (Sentinel-6).glb",
+      "origin_image": "Jason Continuity of Service (Sentinel-6)/Jason Continuity of Service (Sentinel-6).png",
+      "file": "sentinel_6.glb",
+      "thumbnail": "sentinel_6.jpg",
+      "size_m": 5.13,
+      "exact": {
+        "norad": [
+          46984
+        ],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": [
+          "^SENTINEL-6"
+        ]
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 5.132573,
+      "sha256": "cd257b8d63deef018d0227fa6c4bcb29974f257073c4d4f92abd557098b3d580",
+      "bytes": 2108496
+    },
+    {
+      "key": "chandra",
+      "provider": "nasa",
+      "title": "Chandra X-ray Observatory",
+      "label": "찬드라 X선 관측위성",
+      "origin": "Chandra X-ray Observatory/Chandra X-ray Observatory.glb",
+      "origin_image": "Chandra X-ray Observatory/Chandra X-ray Observatory.png",
+      "file": "chandra.glb",
+      "thumbnail": "chandra.jpg",
+      "size_m": 19.5,
+      "exact": {
+        "norad": [
+          25867
+        ],
+        "names": [
+          "^CHANDRA$",
+          "^CXO$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 19.506997,
+      "sha256": "9383f44fc4c6eba73c40b0c2cfe33c08c90f1fb5230274bfdaa98e0c9f116a34",
+      "bytes": 998500
+    },
+    {
+      "key": "van_allen",
+      "provider": "nasa",
+      "title": "Van Allen Probes",
+      "label": "Van Allen Probes (RBSP)",
+      "origin": "Van Allen Probes/Van Allen Probes.glb",
+      "origin_image": "Van Allen Probes/Van Allen Probes.png",
+      "file": "van_allen.glb",
+      "thumbnail": "van_allen.jpg",
+      "size_m": 100,
+      "exact": {
+        "norad": [
+          38752,
+          38753
+        ],
+        "names": [
+          "^RBSP [AB]$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 1277.607412,
+      "sha256": "be9ed53e1452c615750e8d2f977a168eb95216cb82fb698c16d5e08cb4b891f0",
+      "bytes": 933260
+    },
+    {
+      "key": "poes",
+      "provider": "nasa",
+      "title": "Polar Operational Environmental Satellite (POES)",
+      "label": "NOAA POES 계열",
+      "origin": "Polar Operational Environmental Satellite (POES)/Polar Operational Environmental Satellite (POES).glb",
+      "origin_image": "Polar Operational Environmental Satellite (POES)/Polar Operational Environmental Satellite (POES).png",
+      "file": "poes.glb",
+      "thumbnail": "poes.jpg",
+      "size_m": 8,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [
+          25338,
+          28654,
+          33591
+        ],
+        "names": [
+          "^NOAA 1[5-9]$"
+        ]
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 408.283832,
+      "sha256": "30a8bfdb6585bb87e27d8a847046a55f8c299456e3752d1b00786942c59035aa",
+      "bytes": 1158944
+    },
+    {
+      "key": "eo_1",
+      "provider": "nasa",
+      "title": "Earth Observing-1 (EO-1)",
+      "label": "Earth Observing-1",
+      "origin": "Earth Observing-1 (EO-1)/Earth Observing-1 (EO-1).glb",
+      "origin_image": "Earth Observing-1 (EO-1)/Earth Observing-1 (EO-1).png",
+      "file": "eo_1.glb",
+      "thumbnail": "eo_1.jpg",
+      "size_m": 7,
+      "exact": {
+        "norad": [
+          26619
+        ],
+        "names": [
+          "^EO-1$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 128.949556,
+      "sha256": "2d26422a45147e86c93c535979b1d9ae16d34fc0171f661dec051bca61c14a74",
+      "bytes": 224580
+    },
+    {
+      "key": "sac_c",
+      "provider": "nasa",
+      "title": "Satellite for Scientific Applications (SAC-C)",
+      "label": "SAC-C",
+      "origin": "Satellite for Scientific Applications (SAC-C)/Satellite for Scientific Applications (SAC-C).glb",
+      "origin_image": "Satellite for Scientific Applications (SAC-C)/Satellite for Scientific Applications (SAC-C).png",
+      "file": "sac_c.glb",
+      "thumbnail": "sac_c.jpg",
+      "size_m": 6,
+      "exact": {
+        "norad": [
+          26620
+        ],
+        "names": [
+          "^SAC-C$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 60.236134,
+      "sha256": "cf1e9ad3923ded6f6157ec06b545de50840b5b7c9526d0a9bda8be1f021ca745",
+      "bytes": 73608
+    },
+    {
+      "key": "radarsat_1",
+      "provider": "nasa",
+      "title": "Radar Satellite-1 (RADARSAT-1)",
+      "label": "RADARSAT-1",
+      "origin": "Radar Satellite-1 (RADARSAT-1)/Radar Satellite-1 (RADARSAT-1).glb",
+      "origin_image": "Radar Satellite-1 (RADARSAT-1)/Radar Satellite-1 (RADARSAT-1).png",
+      "file": "radarsat_1.glb",
+      "thumbnail": "radarsat_1.jpg",
+      "size_m": 15,
+      "exact": {
+        "norad": [
+          25260
+        ],
+        "names": [
+          "^RADARSAT-1$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 160.223282,
+      "sha256": "db609daaf38354f67d73f412e44d78642383de157f0e2d1de85c3614562cb86f",
+      "bytes": 68148
+    },
+    {
+      "key": "cubesat_1u",
+      "provider": "nasa",
+      "title": "CubeSat - 1 RU Generic",
+      "label": "1U 큐브샛 (일반형)",
+      "origin": "CubeSat - 1 RU Generic/CubeSat - 1 RU Generic.glb",
+      "origin_image": "CubeSat - 1 RU Generic/CubeSat - 1 RU Generic.png",
+      "file": "cubesat_1u.glb",
+      "thumbnail": "cubesat_1u.jpg",
+      "size_m": 0.25,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "\\b1U\\b"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 5.192776,
+      "sha256": "bae308ea2e33778c93675909f7dc2e0d5d6916cd685668a463566c61224b1e85",
+      "bytes": 149424
+    },
+    {
+      "key": "ssl_1300",
+      "provider": "nasa",
+      "title": "Space Systems Loral (SSL-1300)",
+      "label": "SSL-1300 정지궤도 통신위성 버스",
+      "origin": "Space Systems Loral (SSL-1300)/Space Systems Loral (SSL-1300).glb",
+      "origin_image": "Space Systems Loral (SSL-1300)/Space Systems Loral (SSL-1300).png",
+      "file": "ssl_1300.glb",
+      "thumbnail": "ssl_1300.jpg",
+      "size_m": 26,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 268.330505,
+      "sha256": "63cd644d67ee49ab79e313bb6cb0495e9f6072d421a84e116c2c3f9c40bf9c0c",
+      "bytes": 510324
+    },
+    {
+      "key": "mms",
+      "provider": "nasa",
+      "title": "Magnetospheric Multiscale (MMS) (A)",
+      "label": "MMS 자기권 관측위성",
+      "origin": "Magnetospheric Multiscale (MMS) (A)/Magnetospheric Multiscale (MMS) (A).glb",
+      "origin_image": "Magnetospheric Multiscale (MMS) (A)/Magnetospheric Multiscale (MMS) (A).png",
+      "file": "mms.glb",
+      "thumbnail": "mms.jpg",
+      "size_m": 3.5,
+      "exact": {
+        "norad": [
+          40482,
+          40483,
+          40484,
+          40485
+        ],
+        "names": [
+          "^MMS [1-4]$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 8.527019,
+      "sha256": "e3688a8db82f1918c3b4525f4ceed08b614a3a2c5be09ade5711baba30262eef",
+      "bytes": 335808
+    },
+    {
+      "key": "cygnss",
+      "provider": "nasa",
+      "title": "Cyclone Global Navigation Satellite System (CYGNSS)",
+      "label": "CYGNSS",
+      "origin": "Cyclone Global Navigation Satellite System (CYGNSS)/Cyclone Global Navigation Satellite System (CYGNSS).glb",
+      "origin_image": "Cyclone Global Navigation Satellite System (CYGNSS)/Cyclone Global Navigation Satellite System (CYGNSS).png",
+      "file": "cygnss.glb",
+      "thumbnail": "cygnss.jpg",
+      "size_m": 1.65,
+      "exact": {
+        "norad": [],
+        "names": [
+          "^CYGNSS"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 1.590484,
+      "sha256": "830321f2d30099b4355f835d7ae5a2ab1f9f91c292dd01dfc008b8d4bf64c962",
+      "bytes": 1622924
+    },
+    {
+      "key": "gpm",
+      "provider": "nasa",
+      "title": "Global Precipitation Measurement",
+      "label": "GPM Core Observatory",
+      "origin": "Global Precipitation Measurement/Global Precipitation Measurement.glb",
+      "origin_image": "Global Precipitation Measurement/Global Precipitation Measurement.png",
+      "file": "gpm.glb",
+      "thumbnail": "gpm.jpg",
+      "size_m": 13,
+      "exact": {
+        "norad": [
+          39574
+        ],
+        "names": [
+          "^GPM"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 431.896061,
+      "sha256": "7068c880770bb2ac936e804a1af48e564c90b829ff884c405a4759e8da9e693e",
+      "bytes": 2257008
+    },
+    {
+      "key": "hinode",
+      "provider": "nasa",
+      "title": "Hinode (Solar-B)",
+      "label": "Hinode (Solar-B)",
+      "origin": "Hinode (Solar-B)/Hinode (Solar-B).glb",
+      "origin_image": "Hinode (Solar-B)/Hinode (Solar-B).png",
+      "file": "hinode.glb",
+      "thumbnail": "hinode.jpg",
+      "size_m": 10,
+      "exact": {
+        "norad": [
+          29479
+        ],
+        "names": [
+          "^HINODE"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 229.619946,
+      "sha256": "104f23212d379541990c28b26999db3bcfb2ef0731285f2366219e5438e125e6",
+      "bytes": 276248
+    },
+    {
+      "key": "calipso",
+      "provider": "nasa",
+      "title": "Cloud-Aerosol Lidar and Infrared Pathfinder Satellite (CALIPSO)",
+      "label": "CALIPSO",
+      "origin": "Cloud-Aerosol Lidar and Infrared Pathfinder Satellite (CALIPSO)/Cloud-Aerosol Lidar and Infrared Pathfinder Satellite (CALIPSO).glb",
+      "origin_image": "Cloud-Aerosol Lidar and Infrared Pathfinder Satellite (CALIPSO)/Cloud-Aerosol Lidar and Infrared Pathfinder Satellite (CALIPSO).png",
+      "file": "calipso.glb",
+      "thumbnail": "calipso.jpg",
+      "size_m": 4.7,
+      "exact": {
+        "norad": [
+          29108
+        ],
+        "names": [
+          "^CALIPSO"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 227.586481,
+      "sha256": "4abd7708d0f2629baf3e58e9d5df634c34692365791e58a7795742854e53de1d",
+      "bytes": 536084
+    },
+    {
+      "key": "cloudsat",
+      "provider": "nasa",
+      "title": "CloudSat (A)",
+      "label": "CloudSat",
+      "origin": "CloudSat (A)/CloudSat (A).glb",
+      "origin_image": "CloudSat (A)/CloudSat (A).png",
+      "file": "cloudsat.glb",
+      "thumbnail": "cloudsat.jpg",
+      "size_m": 4.6,
+      "exact": {
+        "norad": [
+          29107
+        ],
+        "names": [
+          "^CLOUDSAT"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 172.140313,
+      "sha256": "293aab60f12decc020fe7e19ddd0837b0643067425a4ad09f01ffd8a380e7423",
+      "bytes": 267656
+    },
+    {
+      "key": "topex",
+      "provider": "nasa",
+      "title": "TOPEX-Poseidon",
+      "label": "TOPEX/Poseidon",
+      "origin": "TOPEX-Poseidon/TOPEX-Poseidon.glb",
+      "origin_image": "TOPEX-Poseidon/TOPEX-Poseidon.png",
+      "file": "topex.glb",
+      "thumbnail": "topex.jpg",
+      "size_m": 11.5,
+      "exact": {
+        "norad": [
+          22076
+        ],
+        "names": [
+          "^TOPEX"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 373.170898,
+      "sha256": "e5ff3cae87bbdc59c07a626bea1907aa24678038e1431ff703e85fe9d5c88c0c",
+      "bytes": 214264
+    },
+    {
+      "key": "ibex",
+      "provider": "nasa",
+      "title": "Interstellar Boundary Explorer (IBEX)",
+      "label": "IBEX",
+      "origin": "Interstellar Boundary Explorer (IBEX)/Interstellar Boundary Explorer (IBEX).glb",
+      "origin_image": "Interstellar Boundary Explorer (IBEX)/Interstellar Boundary Explorer (IBEX).png",
+      "file": "ibex.glb",
+      "thumbnail": "ibex.jpg",
+      "size_m": 1.0,
+      "exact": {
+        "norad": [
+          33401
+        ],
+        "names": [
+          "^IBEX"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 1.526959,
+      "sha256": "6ce15c60467673f599c7085ed5152a07d0335628109741848ce64835e3786406",
+      "bytes": 1306616
+    },
+    {
+      "key": "fermi",
+      "provider": "nasa",
+      "title": "Fermi Gamma-ray Large Area Space Telescope",
+      "label": "Fermi (GLAST)",
+      "origin": "Fermi Gamma-ray Large Area Space Telescope/Fermi Gamma-ray Large Area Space Telescope.glb",
+      "origin_image": "Fermi Gamma-ray Large Area Space Telescope/Fermi Gamma-ray Large Area Space Telescope.png",
+      "file": "fermi.glb",
+      "thumbnail": "fermi.jpg",
+      "size_m": 15,
+      "exact": {
+        "norad": [
+          33053
+        ],
+        "names": [
+          "^FERMI",
+          "^FGST",
+          "GLAST"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 62.307728,
+      "sha256": "d345f3b0595f7792f699acf33b28d7401cb53cc2a20b735bca00e95644e3813c",
+      "bytes": 1379016
+    },
+    {
+      "key": "aquarius",
+      "provider": "nasa",
+      "title": "Aquarius (A)",
+      "label": "SAC-D / Aquarius",
+      "origin": "Aquarius (A)/Aquarius (A).glb",
+      "origin_image": "Aquarius (A)/Aquarius (A).png",
+      "file": "aquarius.glb",
+      "thumbnail": "aquarius.jpg",
+      "size_m": 7,
+      "exact": {
+        "norad": [
+          37673
+        ],
+        "names": [
+          "^SAC-D"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 10.663592,
+      "sha256": "dc81055c83e5da56d3ae57f4c967010be64ad5d01cee4cdb0a88c85c2b628116",
+      "bytes": 1137428
+    },
+    {
+      "key": "geotail",
+      "provider": "nasa",
+      "title": "GeoTailSAT",
+      "label": "Geotail",
+      "origin": "GeoTailSAT/GeoTailSAT.glb",
+      "origin_image": "GeoTailSAT/GeoTailSAT.png",
+      "file": "geotail.glb",
+      "thumbnail": "geotail.jpg",
+      "size_m": 100,
+      "exact": {
+        "norad": [
+          22049
+        ],
+        "names": [
+          "^GEOTAIL"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 10510.700289,
+      "sha256": "3b39a3fc157731421869dab707dd5c4d3d829ab0b727b2a6cc8bc211fd96a8ad",
+      "bytes": 91504
+    },
+    {
+      "key": "themis",
+      "provider": "nasa",
+      "title": "Time History of Events and Macroscale Interactions During Substorms (THEMIS)",
+      "label": "THEMIS",
+      "origin": "Time History of Events and Macroscale Interactions During Substorms (THEMIS)/Time History of Events and Macroscale Interactions During Substorms (THEMIS).glb",
+      "origin_image": "Time History of Events and Macroscale Interactions During Substorms (THEMIS)/Time History of Events and Macroscale Interactions During Substorms (THEMIS).png",
+      "file": "themis.glb",
+      "thumbnail": "themis.jpg",
+      "size_m": 2.5,
+      "exact": {
+        "norad": [
+          30580,
+          30583,
+          30584
+        ],
+        "names": [
+          "^THEMIS"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 7.206684,
+      "sha256": "2dfe2a2e07de211f6686adbb612c09c5dfac62a397cb88343f119c2124d818e3",
+      "bytes": 682092
+    },
+    {
+      "key": "sorce",
+      "provider": "nasa",
+      "title": "Solar Radiation and Climate Experiment (SORCE)",
+      "label": "SORCE",
+      "origin": "Solar Radiation and Climate Experiment (SORCE)/Solar Radiation and Climate Experiment (SORCE).glb",
+      "origin_image": "Solar Radiation and Climate Experiment (SORCE)/Solar Radiation and Climate Experiment (SORCE).png",
+      "file": "sorce.glb",
+      "thumbnail": "sorce.jpg",
+      "size_m": 3.4,
+      "exact": {
+        "norad": [
+          27651
+        ],
+        "names": [
+          "^SORCE"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 243.036244,
+      "sha256": "8ec505080199227d25897f5157f4cd87e60092d69b16079deb3ca32caa2ce10d",
+      "bytes": 366492
+    },
+    {
+      "key": "toms",
+      "provider": "nasa",
+      "title": "Total Ozone Mapping Spectrometer (TOMS)",
+      "label": "TOMS-EP",
+      "origin": "Total Ozone Mapping Spectrometer (TOMS)/Total Ozone Mapping Spectrometer (TOMS).glb",
+      "origin_image": "Total Ozone Mapping Spectrometer (TOMS)/Total Ozone Mapping Spectrometer (TOMS).png",
+      "file": "toms.glb",
+      "thumbnail": "toms.jpg",
+      "size_m": 1.6,
+      "exact": {
+        "norad": [
+          23940
+        ],
+        "names": [
+          "TOMS"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 38.918068,
+      "sha256": "36578255a65849073c12d596d255a2fc2042730576bfb433bb9073eb66d287d2",
+      "bytes": 98620
+    },
+    {
+      "key": "polar",
+      "provider": "nasa",
+      "title": "Polar",
+      "label": "Polar",
+      "origin": "Polar/Polar.glb",
+      "origin_image": "Polar/Polar.png",
+      "file": "polar.glb",
+      "thumbnail": "polar.jpg",
+      "size_m": 6,
+      "exact": {
+        "norad": [
+          23802
+        ],
+        "names": [
+          "^POLAR$"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 26.931483,
+      "sha256": "0ffe9e41f6686db7dcaf3144f967f0f419e72b6a90218d955b1654cf0478801d",
+      "bytes": 98592
+    },
+    {
+      "key": "swas",
+      "provider": "nasa",
+      "title": "Submillimeter Wave Astronomy Satellite (SWAS)",
+      "label": "SWAS",
+      "origin": "Submillimeter Wave Astronomy Satellite (SWAS)/Submillimeter Wave Astronomy Satellite (SWAS).glb",
+      "origin_image": "Submillimeter Wave Astronomy Satellite (SWAS)/Submillimeter Wave Astronomy Satellite (SWAS).png",
+      "file": "swas.glb",
+      "thumbnail": "swas.jpg",
+      "size_m": 1.6,
+      "exact": {
+        "norad": [
+          25560
+        ],
+        "names": [
+          "^SWAS"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 82.262897,
+      "sha256": "c1d58e66cb2f1185fc98b5941cbfeb3dbdb453b817a87f95e6bf8d176630f5a1",
+      "bytes": 150296
+    },
+    {
+      "key": "fuse",
+      "provider": "nasa",
+      "title": "Far Ultraviolet Spectroscopic Explorer",
+      "label": "FUSE",
+      "origin": "Far Ultraviolet Spectroscopic Explorer/Far Ultraviolet Spectroscopic Explorer.glb",
+      "origin_image": "Far Ultraviolet Spectroscopic Explorer/Far Ultraviolet Spectroscopic Explorer.png",
+      "file": "fuse.glb",
+      "thumbnail": "fuse.jpg",
+      "size_m": 5.6,
+      "exact": {
+        "norad": [
+          25791
+        ],
+        "names": [
+          "^FUSE"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 1.190615,
+      "sha256": "056c26e4f48bc362790ebc42c7c85101037c92b4f50a313bbe2783fc7004cdf8",
+      "bytes": 236704
+    },
+    {
+      "key": "wire",
+      "provider": "nasa",
+      "title": "Wide-Field Infrared Explorer (WIRE)",
+      "label": "WIRE",
+      "origin": "Wide-Field Infrared Explorer (WIRE)/Wide-Field Infrared Explorer (WIRE).glb",
+      "origin_image": "Wide-Field Infrared Explorer (WIRE)/Wide-Field Infrared Explorer (WIRE).png",
+      "file": "wire.glb",
+      "thumbnail": "wire.jpg",
+      "size_m": 1.8,
+      "exact": {
+        "norad": [
+          25646
+        ],
+        "names": [
+          "^WIRE"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 34.318913,
+      "sha256": "adffb87ebd6d884f47b8d82b0aa8c37f72dc1c72bf532ba4117a94c392f6b2d0",
+      "bytes": 375404
+    },
+    {
+      "key": "hete_2",
+      "provider": "nasa",
+      "title": "High Energy Transient Explorer",
+      "label": "HETE-2",
+      "origin": "High Energy Transient Explorer/High Energy Transient Explorer.glb",
+      "origin_image": "High Energy Transient Explorer/High Energy Transient Explorer.png",
+      "file": "hete_2.glb",
+      "thumbnail": "hete_2.jpg",
+      "size_m": 1.0,
+      "exact": {
+        "norad": [
+          26561
+        ],
+        "names": [
+          "^HETE"
+        ]
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": []
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 1.556005,
+      "sha256": "f514f7cff65c0d4d565408b3f6ba113c4a3b97321a3fe770c89f67820e83922c",
+      "bytes": 61836
+    },
+    {
+      "key": "starlink_flat",
+      "provider": "spacetwin",
+      "title": "Starlink형 평판 위성 (자체 제작)",
+      "label": "Starlink형 평판 위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "starlink_flat.glb",
+      "thumbnail": "starlink_flat.jpg",
+      "size_m": 29,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^STARLINK"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 28.9,
+      "sha256": "1f2bd994bca491b82ddaafaae70805b9cab8e8ac42bb1444463e566e44bf29ec",
+      "bytes": 14096
+    },
+    {
+      "key": "gnss_bus",
+      "provider": "spacetwin",
+      "title": "GNSS 항법위성 버스 (자체 제작)",
+      "label": "GNSS 항법위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "gnss_bus.glb",
+      "thumbnail": "gnss_bus.jpg",
+      "size_m": 14,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^NAVSTAR",
+          "^GPS\\b",
+          "GLONASS",
+          "^BEIDOU",
+          "^GSAT",
+          "^GALILEO",
+          "^IRNSS",
+          "^NVS-",
+          "^QZS"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 14.0,
+      "sha256": "caa606c93deae3608a8a7ddb2a66c88d266f9bf11b838e56df47a7f6130e5c7e",
+      "bytes": 43068
+    },
+    {
+      "key": "oneweb",
+      "provider": "spacetwin",
+      "title": "OneWeb형 소형 통신위성 (자체 제작)",
+      "label": "OneWeb형 통신위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "leo_comms_bus.glb",
+      "thumbnail": "leo_comms_bus.jpg",
+      "size_m": 6.3,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^ONEWEB"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 6.3,
+      "sha256": "aba350d67d392924b68b2f8abf9712e55200ad4a88d2340e44c3f5220b84ff09",
+      "bytes": 15896
+    },
+    {
+      "key": "kuiper",
+      "provider": "spacetwin",
+      "title": "Kuiper형 통신위성 (자체 제작)",
+      "label": "Kuiper형 통신위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "leo_comms_bus.glb",
+      "thumbnail": "leo_comms_bus.jpg",
+      "size_m": 12,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^KUIPER"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 6.3,
+      "sha256": "aba350d67d392924b68b2f8abf9712e55200ad4a88d2340e44c3f5220b84ff09",
+      "bytes": 15896
+    },
+    {
+      "key": "iridium",
+      "provider": "spacetwin",
+      "title": "Iridium NEXT형 통신위성 (자체 제작)",
+      "label": "Iridium형 통신위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "leo_comms_bus.glb",
+      "thumbnail": "leo_comms_bus.jpg",
+      "size_m": 9.4,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^IRIDIUM"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 6.3,
+      "sha256": "aba350d67d392924b68b2f8abf9712e55200ad4a88d2340e44c3f5220b84ff09",
+      "bytes": 15896
+    },
+    {
+      "key": "globalstar",
+      "provider": "spacetwin",
+      "title": "Globalstar형 통신위성 (자체 제작)",
+      "label": "Globalstar형 통신위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "leo_comms_bus.glb",
+      "thumbnail": "leo_comms_bus.jpg",
+      "size_m": 10,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^GLOBALSTAR"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 6.3,
+      "sha256": "aba350d67d392924b68b2f8abf9712e55200ad4a88d2340e44c3f5220b84ff09",
+      "bytes": 15896
+    },
+    {
+      "key": "orbcomm",
+      "provider": "spacetwin",
+      "title": "Orbcomm형 통신위성 (자체 제작)",
+      "label": "Orbcomm형 통신위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "leo_comms_bus.glb",
+      "thumbnail": "leo_comms_bus.jpg",
+      "size_m": 6,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^ORBCOMM"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 6.3,
+      "sha256": "aba350d67d392924b68b2f8abf9712e55200ad4a88d2340e44c3f5220b84ff09",
+      "bytes": 15896
+    },
+    {
+      "key": "o3b",
+      "provider": "spacetwin",
+      "title": "O3b형 MEO 통신위성 (자체 제작)",
+      "label": "O3b형 통신위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "leo_comms_bus.glb",
+      "thumbnail": "leo_comms_bus.jpg",
+      "size_m": 12,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^O3B"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 6.3,
+      "sha256": "aba350d67d392924b68b2f8abf9712e55200ad4a88d2340e44c3f5220b84ff09",
+      "bytes": 15896
+    },
+    {
+      "key": "china_leo_comms",
+      "provider": "spacetwin",
+      "title": "중국 저궤도 통신망 위성 (자체 제작)",
+      "label": "저궤도 통신망 위성",
+      "origin": null,
+      "origin_image": null,
+      "file": "leo_comms_bus.glb",
+      "thumbnail": "leo_comms_bus.jpg",
+      "size_m": 12,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^QIANFAN",
+          "^SATNET",
+          "^GUOWANG",
+          "^HULIANWANG"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 6.3,
+      "sha256": "aba350d67d392924b68b2f8abf9712e55200ad4a88d2340e44c3f5220b84ff09",
+      "bytes": 15896
+    },
+    {
+      "key": "cubesat_3u",
+      "provider": "spacetwin",
+      "title": "3U 큐브샛 (자체 제작)",
+      "label": "3U 큐브샛",
+      "origin": null,
+      "origin_image": null,
+      "file": "cubesat_3u.glb",
+      "thumbnail": "cubesat_3u.jpg",
+      "size_m": 0.7,
+      "exact": {
+        "norad": [],
+        "names": []
+      },
+      "series": {
+        "norad": [],
+        "names": []
+      },
+      "family": {
+        "names": [
+          "^FLOCK",
+          "^DOVE",
+          "^LEMUR",
+          "\\b3U\\b"
+        ]
+      },
+      "orientation": {
+        "heading": 0,
+        "pitch": 0,
+        "roll": 0
+      },
+      "extent": 0.7,
+      "sha256": "8657ecec5c182900985c92b85281f49ca4c7859e1ff40b704aef7a54359d073f",
+      "bytes": 10608
+    }
+  ],
+  "sources": {
+    "nasa": {
+      "name": "NASA 3D Resources",
+      "repository": "https://github.com/nasa/NASA-3D-Resources",
+      "commit": "11ebb4ee043715aefbba6aeec8a61746fad67fa7",
+      "raw_base": "https://raw.githubusercontent.com/nasa/NASA-3D-Resources/11ebb4ee043715aefbba6aeec8a61746fad67fa7/3D Models",
+      "usage_guidelines": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "credit": "NASA 3D Resources"
+    },
+    "spacetwin": {
+      "name": "SpaceTwin 자체 제작 대표 모델",
+      "credit": "SpaceTwin 자체 제작",
+      "repository": "",
+      "note": "공개 3D 자료가 없는 Starlink, OneWeb, GNSS, 3U 큐브샛 등을 위해 build_generic_models.py로 생성한 단순 박스와 원통 조립 형상이다. 제조사 형상이 아니며 치수는 공개 자료를 어림한 근사값이다."
+    },
+    "noaa_goesr": {
+      "name": "NOAA/NASA GOES-R Program 3D model (NASA VTAD)",
+      "credit": "NOAA/NASA GOES-R Program",
+      "repository": "https://www.goes-r.gov/3dModelAR/",
+      "raw_base": "https://www.goes-r.gov/3dModelAR",
+      "usage_guidelines": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "note": "goes-r.gov의 AR 모델 페이지가 제공하는 GLB이며 NASA Visualization Technology Applications and Development(VTAD) 제작으로 표기되어 있다."
+    }
+  }
+}
